@@ -7,6 +7,7 @@ public class Cell {
     private int height;
     private int x;
     private int y;
+    private Board board;
 
 
     public Cell(int x, int y) {
@@ -15,6 +16,7 @@ public class Cell {
         this.height = 0;
         this.x = x;
         this.y = y;
+        this.board = board;
     }
 
     public boolean isOccupied() {
@@ -23,6 +25,18 @@ public class Cell {
     
     public void setOccupiedWorker(Worker worker) {
         this.occupied = worker;
+    }
+
+    public Board getBoard(){
+        return this.board;
+    }
+
+    public int getX(){
+        return x;
+    }
+
+    public int getY(){
+        return y;
     }
 
     public int[] getCoordinates() {

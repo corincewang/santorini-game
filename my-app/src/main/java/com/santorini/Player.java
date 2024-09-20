@@ -2,16 +2,20 @@ package com.santorini;
 
 
 public class Player {
-    private final Worker[] workers;
+    private Worker[] workers;
     private boolean winStatus;
     private boolean loseStatus;
 
     public Player() {
-        this.workers = new Worker[]{new Worker(), new Worker()};
+        this.workers = new Worker[2];
         this.winStatus = false;
         this.loseStatus = false;
     }
 
+    public void placeWorker(Cell cell1, Cell cell2, Board board){
+        this.workers[0] = new Worker(cell1, board);
+        this.workers[1] = new Worker(cell2, board);
+    }
 
     public boolean checkWinStatus() {
         for (Worker worker : this.getWorkers()) {
@@ -38,14 +42,16 @@ public class Player {
         return workers;
     }
 
-    public Worker selectWorker(Worker worker){
-        return worker;
+    public Worker selectWorker(int workerNum){
+        return this.workers[workerNum];
     }
 
 
     public void moveWorker(Worker worker, Cell cell) {
+       
+        
         if (worker.canMoveToCell(cell)) {
-            worker.doWorkerMove(cell);
+           this.selectWorker(1).doWorkerMove(cell);
         }
         else{
             System.out.println("Cannot Make this Move!");
