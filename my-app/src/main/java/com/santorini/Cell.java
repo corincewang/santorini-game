@@ -3,26 +3,41 @@ package com.santorini;
 
 public class Cell {
     private Worker occupied;
-    private Tower tower;
+    private Block block;
+    private int height;
+    private int x;
+    private int y;
 
-    public Cell() {
+
+    public Cell(int x, int y) {
         this.occupied = null;
-        this.tower = new Tower();
+        this.block = new Block();
+        this.height = 0;
+        this.x = x;
+        this.y = y;
     }
 
     public boolean isOccupied() {
         return occupied != null;
+    }
+    
+    public void setOccupiedWorker(Worker worker) {
+        this.occupied = worker;
+    }
+
+    public int[] getCoordinates() {
+        return new int[]{x, y};
     }
 
     public Worker getOccupiedWorker() {
         return occupied;
     }
 
-    public void setOccupiedWorker(Worker worker) {
-        this.occupied = worker;
+    public Block getBlock() {
+        return block;
     }
 
-    public Tower getTower() {
-        return tower;
+    public int getHeight(){
+        return height;
     }
 }

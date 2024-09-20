@@ -1,7 +1,6 @@
 package com.santorini;
 
-
-public class SantoriniGame {
+public class App {
     public static void main(String[] args) {
         Player player1 = new Player();
         Player player2 = new Player();
@@ -14,14 +13,14 @@ public class SantoriniGame {
 
         // 玩家1将worker移动到(1, 1)处
         currentPlayer.moveWorker(worker, board.getCell(1, 1));
-
+        
+        Worker currentWorker = currentPlayer.selectWorker(worker);
         // 玩家1在(1, 1)处建造一个Tower
-        currentPlayer.buildTower(worker, board.getCell(1, 1));
+        currentWorker.buildBlock(board.getCell(1, 1));
 
         // 检查游戏是否获胜
-        if (game.checkWin(currentPlayer)) {
-            System.out.println("Player 1 wins!");
-            game.endGame();
+        if (currentPlayer.checkWinStatus()) {
+            System.out.println(currentPlayer + " wins!");
         }
 
         // 切换到玩家2的回合

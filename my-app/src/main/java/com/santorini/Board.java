@@ -2,13 +2,13 @@ package com.santorini;
 
 
 public class Board {
-    private Cell[][] cells;
+    private final Cell[][] cells;
 
     public Board() {
-        cells = new Cell[5][5];  // Santorini 是 5x5 的游戏板
+        cells = new Cell[5][5]; 
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
-                cells[i][j] = new Cell();
+                cells[i][j] = new Cell(i, j);
             }
         }
     }
@@ -17,3 +17,5 @@ public class Board {
         return cells[x][y];
     }
 }
+
+
