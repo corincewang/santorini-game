@@ -10,6 +10,11 @@ public class Block {
         this.hasDome = false;
     }
 
+    @Override
+    public String toString() {
+        return "Block(height=" + height + ", hasDome=" + hasDome + ")";
+    }
+
     public int getHeight() {
         return height;
     }
@@ -18,10 +23,14 @@ public class Block {
         return hasDome;
     }
 
+    public boolean isValidHeight(){
+        return height < 3;
+    }
+
     public void buildBlock() {
-        if (!hasDome && height < 3) {
+        if (!hasDome && isValidHeight()) {
             height++;
-            System.out.println("Builded Block to" + this + "Current height = " + this.height);
+            System.out.println("Builded Block to: " + this);
         } 
         else if (height == 3) {
             addDome();

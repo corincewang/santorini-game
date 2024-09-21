@@ -21,8 +21,8 @@ public class Worker {
     }
 
     public List<Cell> getValidNeighbors(){
-        System.out.print("worker");
-        System.out.print(board == null);
+        // System.out.print("worker");
+        // System.out.print(board == null);
         List<Cell> validNeighbors = new ArrayList<>();
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -37,7 +37,7 @@ public class Worker {
                 }
             }
         }
-        System.out.println("valid Neighbors for you: " + validNeighbors);
+        System.out.println("valid Neighbors: " + validNeighbors);
         return validNeighbors;
     }
 
@@ -46,7 +46,7 @@ public class Worker {
     }
 
     public boolean canMoveToCell(Cell cell) {
-        System.out.println("canMoveToCell");
+        // System.out.println("canMoveToCell");
         return this.getValidNeighbors().contains(cell) && !cell.getBlock().hasDome();
     }
 

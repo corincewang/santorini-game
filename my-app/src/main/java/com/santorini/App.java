@@ -14,14 +14,14 @@ public class App {
         currentPlayer.placeWorker(board.getCell(1, 2), board.getCell(1, 3), board);
 
         Worker worker = currentPlayer.selectWorker(0);
-        System.out.println("null in APP");
-        System.out.println(worker == null);
+        // System.out.println("null in APP");
+        // System.out.println(worker == null);
 
-        currentPlayer.moveWorker(worker, board.getCell(1, 2));
+        currentPlayer.moveWorker(worker, board.getCell(1, 3));
 
         worker.buildBlock(board.getCell(1, 1));
 
-        // 检查游戏是否获胜
+
         if (currentPlayer.checkWinStatus()) {
             System.out.println(currentPlayer + " wins!");
         }
