@@ -33,5 +33,5 @@ jobs:
       # Runs type checker for Java files
       - name: Run on Java files
         run: |
-          cd java
+          cd my-app
           timeout 2m mvn -f pom.xml site
