@@ -5,8 +5,9 @@ public class Block {
     private int height;
     private boolean hasDome;
     private Cell cell;
-    private int x;
-    private int y;
+    private final int x;
+    private final int y;
+    private static final int MAX_HEIGHT = 3;
 
     public Block(int x, int y) {
         this.height = 0;
@@ -33,7 +34,7 @@ public class Block {
     }
     
     public boolean isValidHeight(){
-        return height < 3;
+        return height < MAX_HEIGHT;
     }
 
     public void buildBlock() {
@@ -41,7 +42,7 @@ public class Block {
             height++;
             System.out.println("Builded Block to: " + this + "\n");
         } 
-        else if (height == 3) {
+        else if (height == MAX_HEIGHT) {
             addDome();
         }
         else{

@@ -11,13 +11,13 @@ public class App {
 
         Player currentPlayer = game.getTurn(); 
         Board board = game.getBoard();
-        currentPlayer.placeWorker(board.getCell(1, 2), board.getCell(1, 3), board);
+        currentPlayer.placeWorker(board.getCell(1, 2), board.getCell(1, 1), board);
 
         Worker worker = currentPlayer.selectWorker(0);
         // System.out.println("null in APP");
         // System.out.println(worker == null);
 
-        currentPlayer.moveWorker(worker, board.getCell(1, 3));
+        currentPlayer.moveWorker(worker, board.getCell(1, 0));
 
         worker.buildBlock(board.getCell(1, 1));
 

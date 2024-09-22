@@ -3,10 +3,10 @@ package com.santorini;
 
 public class Cell {
     private Worker occupied;
-    private Block block;
-    private int height;
-    private int x;
-    private int y;
+    private final Block block;
+    private final int height;
+    private final int x;
+    private final int y;
     private Board board;
 
 
@@ -16,7 +16,6 @@ public class Cell {
         this.height = 0;
         this.x = x;
         this.y = y;
-        this.board = board;
     }
 
     @Override

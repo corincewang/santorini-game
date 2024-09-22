@@ -3,11 +3,12 @@ package com.santorini;
 
 public class Board {
     private final Cell[][] cells;
+    private static final int SIDE = 5;
 
     public Board() {
-        cells = new Cell[5][5]; 
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
+        cells = new Cell[SIDE][SIDE]; 
+        for (int i = 0; i < SIDE ; i++) {
+            for (int j = 0; j < SIDE; j++) {
                 cells[i][j] = new Cell(i, j);
             }
         }

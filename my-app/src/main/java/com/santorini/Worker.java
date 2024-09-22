@@ -5,7 +5,8 @@ import java.util.List;
 
 public class Worker {
     private Cell position;
-    private Board board;
+    private final Board board;
+    private static final int SIDE = 5;
 
     public Worker (Cell position, Board board){
         this.position = position;
@@ -29,7 +30,7 @@ public class Worker {
                 if (i == 0 && j == 0) continue;
                 int newX = position.getX() + i;
                 int newY = position.getY() + j;
-                if (newX >= 0 && newX < 5 && newY >= 0 && newY < 5){
+                if (newX >= 0 && newX < SIDE && newY >= 0 && newY < SIDE){
                     Cell neighbor = board.getCell(newX, newY); 
                             // Check if the new coordinates are within board bounds (0 to 4)
                         if (!neighbor.isOccupied()

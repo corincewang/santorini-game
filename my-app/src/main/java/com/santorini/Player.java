@@ -2,9 +2,10 @@ package com.santorini;
 
 
 public class Player {
-    private Worker[] workers;
+    private final Worker[] workers;
     private boolean winStatus;
     private boolean loseStatus;
+    private static final int MAX_HEIGHT = 3;
 
     public Player() {
         this.workers = new Worker[2];
@@ -22,7 +23,7 @@ public class Player {
 
     public boolean checkWinStatus() {
         for (Worker worker : this.getWorkers()) {
-            if (worker.getPosition().getBlock().getHeight() == 3) {
+            if (worker.getPosition().getBlock().getHeight() == MAX_HEIGHT) {
                 this.winStatus = true;
                 return winStatus;
             }

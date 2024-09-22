@@ -1,9 +1,10 @@
 package com.santorini;
 
 public class Game {
-    private Board board;
-    private Player[] players;
+    private final Board board;
+    private final Player[] players;
     private Player turn;
+    @SuppressWarnings("unused")
     private boolean endState;
 
     public Game(Player player1, Player player2) {
@@ -13,7 +14,7 @@ public class Game {
         this.endState = false; 
     }
 
-
+    
     public Player getTurn() {
         return turn;
     }
