@@ -12,9 +12,12 @@ public class Player {
         this.loseStatus = false;
     }
 
+
     public void placeWorker(Cell cell1, Cell cell2, Board board){
         this.workers[0] = new Worker(cell1, board);
         this.workers[1] = new Worker(cell2, board);
+        cell1.setOccupiedWorker(this.workers[0]); 
+        cell2.setOccupiedWorker(this.workers[1]); 
     }
 
     public boolean checkWinStatus() {
@@ -48,10 +51,8 @@ public class Player {
 
 
     public void moveWorker(Worker worker, Cell cell) {
-       
-        
         if (worker.canMoveToCell(cell)) {
-           this.selectWorker(1).doWorkerMove(cell);
+           worker.doWorkerMove(cell);
         }
         else{
             System.out.println("Cannot Make this Move!");

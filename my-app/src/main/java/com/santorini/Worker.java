@@ -29,15 +29,17 @@ public class Worker {
                 if (i == 0 && j == 0) continue;
                 int newX = position.getX() + i;
                 int newY = position.getY() + j;
-                Cell neighbor = board.getCell(newX, newY); 
-                // Check if the new coordinates are within board bounds (0 to 4)
-                if (newX >= 0 && newX < 5 && newY >= 0 && newY < 5 && !neighbor.isOccupied()
-                    && (neighbor.getBlock().getHeight() - this.position.getBlock().getHeight()  <=1)){
-                    validNeighbors.add(neighbor);
+                if (newX >= 0 && newX < 5 && newY >= 0 && newY < 5){
+                    Cell neighbor = board.getCell(newX, newY); 
+                            // Check if the new coordinates are within board bounds (0 to 4)
+                        if (!neighbor.isOccupied()
+                        && (neighbor.getBlock().getHeight() - this.position.getBlock().getHeight()  <=1)){
+                        validNeighbors.add(neighbor);
+                    }
                 }
             }
         }
-        System.out.println("valid Neighbors: " + validNeighbors);
+        // System.out.println("valid Neighbors: " + validNeighbors);
         return validNeighbors;
     }
 
@@ -45,9 +47,8 @@ public class Worker {
         return this.getValidNeighbors().isEmpty();
     }
 
-    public boolean canMoveToCell(Cell cell) {
-        // System.out.println("canMoveToCell");
-        return this.getValidNeighbors().contains(cell) && !cell.getBlock().hasDome();
+    public boolean canMoveToCell(Cell newCell) {
+        return !newCell.isOccupied() && this.getValidNeighbors().contains(newCell) && !newCell.getBlock().hasDome();
     }
 
 
@@ -58,12 +59,21 @@ public class Worker {
             }
             newCell.setOccupiedWorker(this);  
             this.position = newCell;  
-            System.out.println(this + "Moved to" + this.position + ", height = " + this.position.getHeight());
+            System.out.println("\n"+ this + " Moved to" + this.position + ", height = " + this.position.getBlock().getHeight());
         }
+    }
 
+    public boolean canBuildToCell(Cell cell) {
+        return this.getValidNeighbors().contains(cell) && !cell.getBlock().hasDome();
     }
 
     public void buildBlock(Cell cell) {
-        cell.getBlock().buildBlock();
+        if (canBuildToCell(cell)){
+            cell.getBlock().buildBlock();
+        }
+        else{
+            System.out.println("Invalid Build because" + cell + " is not a neighbor. Rechoose a cell!\n");
+        }
+       
     }
 }

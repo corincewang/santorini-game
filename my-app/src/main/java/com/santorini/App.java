@@ -26,7 +26,6 @@ public class App {
             System.out.println(currentPlayer + " wins!");
         }
 
-        // 切换到玩家2的回合
         game.switchTurn();
     }
 }

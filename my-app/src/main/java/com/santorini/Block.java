@@ -4,15 +4,20 @@ package com.santorini;
 public class Block {
     private int height;
     private boolean hasDome;
+    private Cell cell;
+    private int x;
+    private int y;
 
-    public Block() {
+    public Block(int x, int y) {
         this.height = 0;
         this.hasDome = false;
+        this.x = x;
+        this.y = y;
     }
 
     @Override
     public String toString() {
-        return "Block(height=" + height + ", hasDome=" + hasDome + ")";
+        return "Block(x=" + x + " y=" + y + ", height=" + height + ", hasDome=" + hasDome + ")";
     }
 
     public int getHeight() {
@@ -23,6 +28,10 @@ public class Block {
         return hasDome;
     }
 
+    public int[] getPosition(){
+        return this.cell.getCoordinates();
+    }
+    
     public boolean isValidHeight(){
         return height < 3;
     }
@@ -30,10 +39,13 @@ public class Block {
     public void buildBlock() {
         if (!hasDome && isValidHeight()) {
             height++;
-            System.out.println("Builded Block to: " + this);
+            System.out.println("Builded Block to: " + this + "\n");
         } 
         else if (height == 3) {
             addDome();
+        }
+        else{
+            System.out.println("Invalid Build because block " + this + " has Dome or reaches max height. Rechoose a cell!");
         }
     }
 

@@ -12,11 +12,16 @@ public class Cell {
 
     public Cell(int x, int y) {
         this.occupied = null;
-        this.block = new Block();
+        this.block = new Block(x, y);
         this.height = 0;
         this.x = x;
         this.y = y;
         this.board = board;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
     }
 
     public boolean isOccupied() {
