@@ -5,9 +5,6 @@ import com.santorini.Game;
 import com.santorini.Player;
 import com.santorini.Worker;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 import junit.framework.TestCase;
 
 public class AppTest extends TestCase {
@@ -15,6 +12,7 @@ public class AppTest extends TestCase {
     private Player player1;
     private Player player2;
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         player1 = new Player();
