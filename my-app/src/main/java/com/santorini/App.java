@@ -21,7 +21,7 @@ public class App {
 
         Worker worker = currentPlayer.selectWorker(0);
 
-        currentPlayer.moveWorker(worker, board.getCell(1, 0));
+        game.moveWorker(worker, board.getCell(1, 0));
 
         worker.buildBlock(board.getCell(1, 1));
 

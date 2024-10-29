@@ -74,7 +74,7 @@ public class Player {
         return workers;
     }
 
-    /**
+     /**
      * Selects one of the player's workers based on the specified index.
      *
      * @param workerNum the index of the worker (0 or 1)
@@ -84,20 +84,5 @@ public class Player {
         return this.workers[workerNum];
     }
 
-
-     /**
-     * Moves a specified worker to a target cell, if the move is valid.
-     *
-     * @param worker the Worker to move
-     * @param cell the target Cell to move the worker to
-     */
-    public void moveWorker(Worker worker, Cell cell) {
-        if (worker.canMoveToCell(cell)) {
-           worker.doWorkerMove(cell);
-        }
-        else{
-            System.out.println("Cannot Make this Move!");
-        }
-    }
 
 }

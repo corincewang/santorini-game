@@ -45,13 +45,13 @@ public class AppTest extends TestCase {
 
     public void testMoveWorker() {
         Worker worker1 = player1.selectWorker(0);
-        player1.moveWorker(worker1, board.getCell(2, 2));
+        game.moveWorker(worker1, board.getCell(2, 2));
         assertEquals(board.getCell(2, 2), worker1.getPosition());
     }
 
     public void testBuildBlock() {
         Worker worker1 = player1.selectWorker(0);
-        player1.moveWorker(worker1, board.getCell(2, 2)); // Move to (2, 2)
+        game.moveWorker(worker1, board.getCell(2, 2)); // Move to (2, 2)
         
         // Attempting a legal build
         worker1.buildBlock(board.getCell(2, 3));
@@ -79,7 +79,7 @@ public class AppTest extends TestCase {
         Worker worker3 = player2.selectWorker(0);
         
         // Move worker
-        player2.moveWorker(worker3, board.getCell(3, 2));
+        game.moveWorker(worker3, board.getCell(3, 2));
         assertEquals(board.getCell(3, 2), worker3.getPosition());
     }
     
@@ -87,7 +87,7 @@ public class AppTest extends TestCase {
         // Setup workers for player2
         player2.placeWorker(board.getCell(3, 1), board.getCell(4, 1), board);
         Worker worker3 = player2.selectWorker(0);
-        player2.moveWorker(worker3, board.getCell(3, 2)); // Move to (3, 2)
+        game.moveWorker(worker3, board.getCell(3, 2)); // Move to (3, 2)
     
         // Build block
         worker3.buildBlock(board.getCell(3, 3));
@@ -101,25 +101,25 @@ public class AppTest extends TestCase {
         Worker worker2 = player1.selectWorker(1);
 
         System.out.println("round 1: " );
-        player1.moveWorker(worker1, board.getCell(2, 1));
+        game.moveWorker(worker1, board.getCell(2, 1));
         worker1.buildBlock(board.getCell(2, 2));
-        player1.moveWorker(worker2, board.getCell(1, 2));
+        game.moveWorker(worker2, board.getCell(1, 2));
         worker2.buildBlock(board.getCell(2, 3));
 
         System.out.println("round 2: " );
-        player1.moveWorker(worker1, board.getCell(2, 2));
+        game.moveWorker(worker1, board.getCell(2, 2));
         worker1.buildBlock(board.getCell(2, 3));
-        player1.moveWorker(worker2, board.getCell(2, 1));
+        game.moveWorker(worker2, board.getCell(2, 1));
         worker2.buildBlock(board.getCell(3, 2));
 
         System.out.println("round 3: " );
-        player1.moveWorker(worker1, board.getCell(2, 3));
+        game.moveWorker(worker1, board.getCell(2, 3));
         worker1.buildBlock(board.getCell(2, 2));
-        player1.moveWorker(worker2, board.getCell(3, 2));
+        game.moveWorker(worker2, board.getCell(3, 2));
         worker2.buildBlock(board.getCell(2, 2));
 
         System.out.println("round 4: " );
-        player1.moveWorker(worker1, board.getCell(2, 2));
+        game.moveWorker(worker1, board.getCell(2, 2));
         
 
         assertTrue(player1.checkWinStatus());

@@ -75,6 +75,21 @@ public class Game {
     public void switchTurn() {
         this.turn = (turn == players[0]) ? players[1] : players[0];
     }
+    
+      /**
+     * Moves a specified worker to a target cell, if the move is valid.
+     *
+     * @param worker the Worker to move
+     * @param cell the target Cell to move the worker to
+     */
+    public void moveWorker(Worker worker, Cell cell) {
+        if (worker.canMoveToCell(cell)) {
+           worker.doWorkerMove(cell);
+        }
+        else{
+            System.out.println("Cannot Make this Move!");
+        }
+    }
 
 
 }
