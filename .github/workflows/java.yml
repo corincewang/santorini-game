@@ -34,4 +34,6 @@ jobs:
       - name: Run on Java files
         run: |
           cd my-app
+          timeout 2m mvn clean test
           timeout 2m mvn -f pom.xml site
+
