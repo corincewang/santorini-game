@@ -3,24 +3,52 @@ package com.santorini;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Worker class represents a worker in the Santorini game. 
+ * It manages the worker's position on the board, determines valid movements, 
+ * and handles building actions in neighboring cells.
+ */
 public class Worker {
     private Cell position;
     private final Board board;
     private static final int SIDE = 5;
 
+     /**
+     * Constructs a Worker with an initial position and reference to the game board.
+     *
+     * @param position the initial cell where the worker is placed
+     * @param board the board on which the worker is located
+     */
     public Worker (Cell position, Board board){
         this.position = position;
         this.board = board;
     }
     
+    /**
+     * Gets the current position of the worker.
+     *
+     * @return the current Cell object representing the worker's position
+     */
     public Cell getPosition() {
         return position;
     }
 
+    /**
+     * Sets a new position for the worker.
+     *
+     * @param cell the new cell where the worker will be placed
+     */
     public void setPosition(Cell cell) {
         this.position = cell; 
     }
 
+    /**
+     * Retrieves a list of valid neighboring cells the worker can move to.
+     * A valid neighbor is an adjacent cell that is not occupied, 
+     * is within the board boundaries, and has an acceptable height difference.
+     *
+     * @return a list of valid neighboring cells for movement
+     */
     public List<Cell> getValidNeighbors(){
         // System.out.print("worker");
         // System.out.print(board == null);
@@ -44,15 +72,32 @@ public class Worker {
         return validNeighbors;
     }
 
+    /**
+     * Checks if there are any valid neighboring cells the worker can move to.
+     *
+     * @return true if there are no valid cells to move to, false otherwise
+     */
     public boolean canMoveWorker(){
         return this.getValidNeighbors().isEmpty();
     }
 
+    /**
+     * Determines if the worker can move to a specified cell.
+     * A move is valid if the cell is unoccupied, within reach, and does not have a dome.
+     *
+     * @param newCell the cell to which the worker intends to move
+     * @return true if the worker can move to the specified cell, false otherwise
+     */
     public boolean canMoveToCell(Cell newCell) {
         return !newCell.isOccupied() && this.getValidNeighbors().contains(newCell) && !newCell.getBlock().hasDome();
     }
 
 
+    /**
+     * Executes a move of the worker to a specified cell if the move is valid.
+     *
+     * @param newCell the target cell for the worker's move
+     */
     public void doWorkerMove(Cell newCell) {
         if (canMoveToCell(newCell)){
             if (position != null) {
@@ -64,16 +109,29 @@ public class Worker {
         }
     }
 
+    /**
+     * Checks if the worker can build a block in a specified target cell.
+     * The build is valid if the cell is a neighboring cell within reach and does not have a dome.
+     *
+     * @param cell the cell where the worker intends to build
+     * @return true if building in the cell is allowed, false otherwise
+     */
     public boolean canBuildToCell(Cell cell) {
         return this.getValidNeighbors().contains(cell) && !cell.getBlock().hasDome();
     }
 
+    /**
+     * Builds a block in the specified cell if the action is valid.
+     * If the build is invalid, an error message is printed.
+     *
+     * @param cell the cell where the worker intends to build
+     */
     public void buildBlock(Cell cell) {
         if (canBuildToCell(cell)){
             cell.getBlock().buildBlock();
         }
         else{
-            System.out.println("Invalid Build because" + cell + " is not a neighbor. Rechoose a cell!\n");
+            System.out.println("Invalid Build because" + cell + " is not a valid cell. Rechoose a cell!\n");
         }
        
     }

@@ -1,10 +1,16 @@
 package com.santorini;
 
-
+/**
+ * The Board class represents the 5x5 game board for the Santorini game. 
+ * It contains a grid of cells that make up the playable area, where workers can be placed and blocks can be built.
+ */
 public class Board {
     private final Cell[][] cells;
     private static final int SIDE = 5;
 
+     /**
+     * Constructs a 5x5 game board by initializing each cell with its respective coordinates.
+     */
     public Board() {
         cells = new Cell[SIDE][SIDE]; 
         for (int i = 0; i < SIDE ; i++) {
@@ -14,6 +20,13 @@ public class Board {
         }
     }
 
+    /**
+     * Retrieves the Cell object located at the specified coordinates on the board.
+     *
+     * @param x the x-coordinate of the desired cell
+     * @param y the y-coordinate of the desired cell
+     * @return the Cell at the specified (x, y) position on the board
+     */
     public Cell getCell(int x, int y) {
         return cells[x][y];
     }

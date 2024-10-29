@@ -1,8 +1,14 @@
 package com.santorini;
 
 
-
 public class App {
+     /**
+     * The main method for running the Santorini game application.
+     * Initializes players, the game, and performs sample actions to demonstrate
+     * placing workers, moving a worker, building a block, and checking for a win condition.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         System.out.println("start");
         Player player1 = new Player();
@@ -14,8 +20,6 @@ public class App {
         currentPlayer.placeWorker(board.getCell(1, 2), board.getCell(1, 1), board);
 
         Worker worker = currentPlayer.selectWorker(0);
-        // System.out.println("null in APP");
-        // System.out.println(worker == null);
 
         currentPlayer.moveWorker(worker, board.getCell(1, 0));
 
