@@ -32,82 +32,63 @@ public class App extends NanoHTTPD {
         System.out.println("\nSantorini Game Server Running on port 8080!\n");
     }
 
-    @Override
-    public Response serve(IHTTPSession session) {
-        String uri = session.getUri();
-        Map<String, String> params = session.getParms();
-        String responseText;
+ @Override
+public Response serve(IHTTPSession session) {
+    String uri = session.getUri();
+    Map<String, String> params = session.getParms();
+    String responseText = "";
 
-        switch (uri) {
-            case "/newgame" -> {
-                // Start a new game
+    if (uri.equals("/newgame")) {
+        // e.g., /newgame?x1=0&y1=0&x2=1&y2=0
+        if (params.containsKey("x1") && params.containsKey("y1") &&
+            params.containsKey("x2") && params.containsKey("y2")) {
+            try {
+                int x1 = Integer.parseInt(params.get("x1"));
+                int y1 = Integer.parseInt(params.get("y1"));
+                int x2 = Integer.parseInt(params.get("x2"));
+                int y2 = Integer.parseInt(params.get("y2"));
+
+                // Initialize a new game with two players
                 Player player1 = new Player();
                 Player player2 = new Player();
                 this.game = new Game(player1, player2);
-                responseText = "New game started!";
+
+                // Place workers for the first player
+                this.game.getTurn().placeWorker(
+                    this.game.getBoard().getCell(x1, y1),
+                    this.game.getBoard().getCell(x2, y2),
+                    this.game.getBoard()
+                );
+
+                responseText = "New game started with workers placed at (" + x1 + ", " + y1 + ") and (" + x2 + ", " + y2 + ")";
+            } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                responseText = "Error: Invalid coordinates provided for new game!";
             }
-
-            case "/placeworker" -> {
-                // Example: /placeworker?x1=1&y1=2&x2=1&y2=1
-                if (params.containsKey("x1") && params.containsKey("y1") &&
-                        params.containsKey("x2") && params.containsKey("y2")) {
-                    int x1 = Integer.parseInt(params.get("x1"));
-                    int y1 = Integer.parseInt(params.get("y1"));
-                    int x2 = Integer.parseInt(params.get("x2"));
-                    int y2 = Integer.parseInt(params.get("y2"));
-
-                    Player currentPlayer = this.game.getTurn();
-                    Board board = this.game.getBoard();
-                    currentPlayer.placeWorker(board.getCell(x1, y1), board.getCell(x2, y2), board);
-
-                    responseText = "Workers placed at (" + x1 + ", " + y1 + ") and (" + x2 + ", " + y2 + ")";
-                } else {
-                    responseText = "Missing parameters! Example: /placeworker?x1=1&y1=2&x2=1&y2=1";
-                }
-            }
-
-            case "/play" -> {
-                // Example: /play?x=1&y=2
-                if (params.containsKey("x") && params.containsKey("y")) {
-                    int x = Integer.parseInt(params.get("x"));
-                    int y = Integer.parseInt(params.get("y"));
-
-                    this.game = this.game.play(x, y);
-                    responseText = "Move played at (" + x + ", " + y + ")";
-                } else {
-                    responseText = "Missing parameters! Example: /play?x=1&y=2";
-                }
-            }
-
-            case "/status" -> {// Return the current game state
-                this.game.getBoard().toString();
-                responseText = this.game.getBoard().toString();
-            }
-
-            case "/checkwin" -> {
-                // Check if the current player has won
-                Player currentPlayer = this.game.getTurn();
-                if (currentPlayer.checkWinStatus()) {
-                    responseText = currentPlayer + " wins!";
-                } else {
-                    responseText = "No winner yet.";
-                }
-            }
-
-           
-            default -> { 
-                String apiEndpoints = """
-                                      Santorini Game API: Available endpoints:
-                                      /newgame - Start a new game
-                                      /placeworker?x1={x1}&y1={y1}&x2={x2}&y2={y2} - Place workers for the current player
-                                      /play?x={x}&y={y} - Play a move
-                                      /status - Get the current game board
-                                      /checkwin - Check if the current player has won
-                                      """;
-                responseText = apiEndpoints;
-            }
+        } else {
+            responseText = "Missing parameters! Example: /newgame?x1=0&y1=0&x2=1&y2=0";
         }
+    } else if (uri.equals("/play")) {
+        // e.g., /play?x=1&y=1
+        if (params.containsKey("x") && params.containsKey("y")) {
+            try {
+                int x = Integer.parseInt(params.get("x"));
+                int y = Integer.parseInt(params.get("y"));
 
-        return newFixedLengthResponse(responseText);
+                // Execute the play action
+                this.game = this.game.play(x, y);
+                responseText = "Move played at (" + x + ", " + y + ")";
+            } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                responseText = "Error: Invalid coordinates provided for play!";
+            }
+        } else {
+            responseText = "Missing parameters! Example: /play?x=1&y=1";
+        }
     }
+
+    // Extract the view-specific data from the game and apply it to the template
+    GameState gameplay = GameState.forGame(this.game);
+    responseText += "\n" + gameplay.toString();
+    return newFixedLengthResponse(responseText);
+}
+
 }
