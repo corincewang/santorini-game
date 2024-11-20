@@ -91,5 +91,56 @@ public class Game {
         }
     }
 
+    
+/**
+ * Executes a move action for the current player at the specified coordinates (x, y).
+ * If the move is valid, updates the game state and switches the turn to the next player.
+ *
+ * @param x the x-coordinate of the target cell
+ * @param y the y-coordinate of the target cell
+ * @return the updated Game instance after the move
+ */
+public Game play(int x, int y) {
+    // Retrieve the target cell on the board
+    Cell targetCell = this.board.getCell(x, y);
+
+    // Check if the target cell is valid and not occupied
+    if (targetCell == null || targetCell.isOccupied()) {
+        System.out.println("Invalid move: Cell (" + x + ", " + y + ") is either out of bounds or already occupied.");
+        return this;
+    }
+
+    // Check if the game has already ended
+    if (this.endState) {
+        System.out.println("Game has already ended. No further moves are allowed.");
+        return this;
+    }
+
+    // Select the current player's worker (assume worker 0 is the default worker for simplicity)
+    Worker worker = this.turn.getWorkers()[0];
+
+    // Check if the worker can move to the target cell
+    if (!worker.canMoveToCell(targetCell)) {
+        System.out.println("Invalid move: Worker cannot move to cell (" + x + ", " + y + ").");
+        return this;
+    }
+
+    // Perform the worker's move
+    worker.doWorkerMove(targetCell);
+
+    // Check for a win condition after the move
+    if (this.turn.checkWinStatus()) {
+        this.endState = true;
+        System.out.println("Player " + this.turn + " wins!");
+        return this;
+    }
+
+    // Switch the turn to the next player
+    switchTurn();
+
+    // Return the updated game state
+    return this;
+}
+
 
 }
