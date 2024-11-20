@@ -6,7 +6,7 @@ import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
 
 public class App extends NanoHTTPD {
-
+    private static final int SITE_NUM = 8080;
     private Game game;
 
     public static void main(String[] args) {
@@ -23,7 +23,7 @@ public class App extends NanoHTTPD {
      * @throws IOException if the server fails to start
      */
     public App() throws IOException {
-        super(8080);
+        super(SITE_NUM);
 
         Player player1 = new Player();
         Player player2 = new Player();
@@ -73,14 +73,16 @@ public class App extends NanoHTTPD {
                     int x = Integer.parseInt(params.get("x"));
                     int y = Integer.parseInt(params.get("y"));
 
-                    this.game = this.game.play(x, y);
+                    Game newGameState = this.game.play(x, y); // Perform play action
+                    this.game = newGameState; // Assign updated game state
                     responseText = "Move played at (" + x + ", " + y + ")";
                 } else {
                     responseText = "Missing parameters! Example: /play?x=1&y=2";
                 }
             }
 
-            case "/status" -> // Return the current game state
+            case "/status" -> 
+                // Return the current game state
                 responseText = this.game.getBoard().toString();
 
             case "/checkwin" -> {
