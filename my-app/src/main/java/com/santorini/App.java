@@ -1,5 +1,4 @@
 package com.santorini;
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -37,7 +36,7 @@ public class App extends NanoHTTPD {
     public Response serve(IHTTPSession session) {
         String uri = session.getUri();
         Map<String, String> params = session.getParms();
-        String responseText = "";
+        String responseText;
 
         switch (uri) {
             case "/newgame" -> {
@@ -73,17 +72,17 @@ public class App extends NanoHTTPD {
                     int x = Integer.parseInt(params.get("x"));
                     int y = Integer.parseInt(params.get("y"));
 
-                    Game newGameState = this.game.play(x, y); // Perform play action
-                    this.game = newGameState; // Assign updated game state
+                    this.game = this.game.play(x, y);
                     responseText = "Move played at (" + x + ", " + y + ")";
                 } else {
                     responseText = "Missing parameters! Example: /play?x=1&y=2";
                 }
             }
 
-            case "/status" -> 
-                // Return the current game state
+            case "/status" -> {// Return the current game state
+                this.game.getBoard().toString();
                 responseText = this.game.getBoard().toString();
+            }
 
             case "/checkwin" -> {
                 // Check if the current player has won
@@ -95,12 +94,18 @@ public class App extends NanoHTTPD {
                 }
             }
 
-            default -> responseText = "Santorini Game API: Available endpoints:\n" +
-                               "/newgame - Start a new game\n" +
-                               "/placeworker?x1={x1}&y1={y1}&x2={x2}&y2={y2} - Place workers for the current player\n" +
-                               "/play?x={x}&y={y} - Play a move\n" +
-                               "/status - Get the current game board\n" +
-                               "/checkwin - Check if the current player has won\n";
+           
+            default -> { 
+                String apiEndpoints = """
+                                      Santorini Game API: Available endpoints:
+                                      /newgame - Start a new game
+                                      /placeworker?x1={x1}&y1={y1}&x2={x2}&y2={y2} - Place workers for the current player
+                                      /play?x={x}&y={y} - Play a move
+                                      /status - Get the current game board
+                                      /checkwin - Check if the current player has won
+                                      """;
+                responseText = apiEndpoints;
+            }
         }
 
         return newFixedLengthResponse(responseText);
