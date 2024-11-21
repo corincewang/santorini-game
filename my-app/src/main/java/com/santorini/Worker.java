@@ -12,16 +12,19 @@ public class Worker {
     private Cell position;
     private final Board board;
     private static final int SIDE = 5;
+    private final Player player;
 
      /**
      * Constructs a Worker with an initial position and reference to the game board.
      *
      * @param position the initial cell where the worker is placed
      * @param board the board on which the worker is located
+     * @param player the player on which the worker is located
      */
-    public Worker (Cell position, Board board){
+    public Worker (Cell position, Board board, Player player){
         this.position = position;
         this.board = board;
+        this.player = player;
     }
     
     /**
@@ -33,6 +36,9 @@ public class Worker {
         return position;
     }
 
+    public Player getPlayer() {
+        return player;
+    }
     /**
      * Sets a new position for the worker.
      *

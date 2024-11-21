@@ -1,6 +1,7 @@
 package com.santorini;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -8,6 +9,7 @@ import fi.iki.elonen.NanoHTTPD;
 public class App extends NanoHTTPD {
     private static final int SITE_NUM = 8080;
     private Game game;
+    private final Map<Player, Integer> playerWorkerCount = new HashMap<>();
 
     public static void main(String[] args) {
         try {
@@ -29,6 +31,10 @@ public class App extends NanoHTTPD {
         Player player2 = new Player();
         this.game = new Game(player1, player2);
 
+        // Initialize worker counts for both players
+        playerWorkerCount.put(player1, 0);
+        playerWorkerCount.put(player2, 0);
+
         start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         System.out.println("\nSantorini Game Server Running on port 8080!\n");
     }
@@ -37,7 +43,6 @@ public class App extends NanoHTTPD {
     public Response serve(IHTTPSession session) {
         String uri = session.getUri();
         Map<String, String> params = session.getParms();
-        System.out.println("Received parameters: " + params);
         String responseText = "";
 
         if (uri.equals("/newgame")) {
@@ -45,6 +50,10 @@ public class App extends NanoHTTPD {
             Player player1 = new Player();
             Player player2 = new Player();
             this.game = new Game(player1, player2);
+
+            // Reset worker counts
+            playerWorkerCount.put(player1, 0);
+            playerWorkerCount.put(player2, 0);
 
             // Generate the game state
             GameState gameState = GameState.forGame(this.game);
@@ -54,44 +63,63 @@ public class App extends NanoHTTPD {
                     "gameState": %s
                 }
                 """.formatted(gameState.toString());
-        } else if (uri.equals("/play")) {
+        } 
+        else if (uri.equals("/play")) {
             if (params.containsKey("action")) {
                 String action = params.get("action");
-                int x = Integer.parseInt(params.getOrDefault("x", "-1"));
-                int y = Integer.parseInt(params.getOrDefault("y", "-1"));
 
                 try {
-                    switch (action) {
-                        case "place":
-                            handlePlaceWorker(x, y);
-                            responseText = buildGameStateResponse("Worker placed at (%d, %d).", x, y);
-                            break;
-                        case "move":
-                            handleMoveWorker(x, y);
-                            responseText = buildGameStateResponse("Worker moved to (%d, %d).", x, y);
-                            break;
-                        case "build":
-                            handleBuildBlock(x, y);
-                            responseText = buildGameStateResponse("Block built at (%d, %d).", x, y);
-                            break;
-                        default:
+                    int x = Integer.parseInt(params.getOrDefault("x", "-1"));
+                    int y = Integer.parseInt(params.getOrDefault("y", "-1"));
+
+                    if ("place".equals(action)) {
+                        Player currentPlayer = this.game.getTurn();
+
+                        // Check if the current player has placed less than 2 workers
+                        int placedWorkers = playerWorkerCount.getOrDefault(currentPlayer, 0);
+                        if (placedWorkers >= 2) {
                             responseText = """
                                 {
-                                    "error": "Invalid action: '%s'. Supported actions: place, move, build."
+                                    "error": "Player %s has already placed 2 workers."
                                 }
-                                """.formatted(action);
+                                """.formatted(currentPlayer);
+                        } else {
+                            // Place the worker
+                            this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
+                            playerWorkerCount.put(currentPlayer, placedWorkers + 1);
+                        
+                        
+
+                            responseText = """
+                                {
+                                    "message": "Worker placed at (%d, %d).",
+                                    "gameState": %s
+                                }
+                                """.formatted(x, y, GameState.forGame(this.game).toString());
+                        }
+                         // If the player placed 2 workers, switch turn
+                         if (playerWorkerCount.get(currentPlayer) == 2) {
+                            this.game.switchTurn();
+                        }
+                    } 
+                    else {
+                        responseText = """
+                            {
+                                "error": "Invalid action: '%s'. Supported action: place."
+                            }
+                            """.formatted(action);
                     }
-                } catch (IllegalArgumentException e) {
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
                     responseText = """
                         {
-                            "error": "%s"
+                            "error": "Invalid or missing coordinates."
                         }
-                        """.formatted(e.getMessage());
+                        """;
                 }
             } else {
                 responseText = """
                     {
-                        "error": "Missing action parameter. Supported actions: place, move, build."
+                        "error": "Missing action parameter. Supported action: place."
                     }
                     """;
             }
@@ -105,6 +133,8 @@ public class App extends NanoHTTPD {
 
         return newFixedLengthResponse(Response.Status.OK, "application/json", responseText);
     }
+
+    
 
     private void handlePlaceWorker(int x, int y) {
         Player currentPlayer = this.game.getTurn();

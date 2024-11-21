@@ -11,7 +11,7 @@ class App extends React.Component<Props, GameState> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      cells: [], // 初始化为一个空数组
+      cells: [], 
       currentPlayer: 'Player 1',
       winner: null,
     };
@@ -36,14 +36,43 @@ class App extends React.Component<Props, GameState> {
     try {
       const response = await fetch(`/play?action=place&x=${x}&y=${y}`);
       const json = await response.json();
-      console.log('Worker placed at:', x, y, 'Response:', json);
-
+  
+      if (json.error) {
+        alert(json.error);
+      } else {
+        // 合并新状态到现有状态
+        const updatedCells = json.gameState?.cells || [];
+  
+        const mergedCells = this.state.cells.map((cell) => {
+          const updatedCell = updatedCells.find(
+            (updated) => updated.x === cell.x && updated.y === cell.y
+          );
+          return updatedCell || cell; // 如果有更新的状态，用更新的；否则保留原有状态
+        });
+  
+        this.setState({
+          cells: mergedCells,
+          currentPlayer: json.gameState?.currentPlayer || 'Player 1',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to place worker:', error);
+    }
+  };
+  
+  
+  moveWorker = async (x: number, y: number): Promise<void> => {
+    try {
+      const response = await fetch(`/play?action=move&x=${x}&y=${y}`);
+      const json = await response.json();
+      console.log('Worker moved to:', x, y, 'Response:', json);
+  
       this.setState({
         cells: json.gameState?.cells || [],
         currentPlayer: json.gameState?.currentPlayer || 'Player 1',
       });
     } catch (error) {
-      console.error('Failed to place worker:', error);
+      console.error('Failed to move worker:', error);
     }
   };
 
@@ -56,12 +85,25 @@ class App extends React.Component<Props, GameState> {
   };
 
   createCell = (cell: Cell, index: number): React.ReactNode => {
+    let cellClass = '';
+    if (cell.player === 'Player1') {
+      cellClass = 'player-one';
+    } else if (cell.player === 'Player2') {
+      cellClass = 'player-two';
+    } else if (cell.playable) {
+      cellClass = 'playable';
+    }
+  
     return (
-      <div key={index} onClick={() => this.handleCellClick(cell)}>
-        <BoardCell cell={cell} />
+      <div
+        key={index}
+        className={`board-cell ${cellClass}`}
+        onClick={() => this.handleCellClick(cell)}
+      >
       </div>
     );
   };
+  
 
   componentDidMount(): void {
     if (!this.initialized) {
@@ -86,9 +128,6 @@ class App extends React.Component<Props, GameState> {
         <div id="bottombar">
           <button onClick={this.newGame}>New Game</button>
           <button>Undo</button>
-        </div>
-        <div id="actions">
-          <button onClick={() => alert('Place Worker Mode Activated')}>Place Worker</button>
         </div>
       </div>
     );

@@ -5,6 +5,7 @@ export interface Cell {
     action?: 'place' | 'move' | 'build'; // Action associated with the cell
     worker?: string; // Which player owns the worker on this cell, if any
     level: number; // Building level (0-3)
+    player: string;
   }
   
   export interface GameState {

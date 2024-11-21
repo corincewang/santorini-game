@@ -27,6 +27,10 @@ public class Game {
         this.endState = false; 
     }
 
+    public Player[] getPlayers(){
+        return players;
+    }
+
     /**
      * Retrieves the player whose turn it currently is.
      *
