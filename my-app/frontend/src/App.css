@@ -105,6 +105,8 @@ body {
 
 
 
+
+
 /* Playable cell hover color */
 .board-cell.playable:hover {
     background-color: #a5d6a7; /* Playable hover color */

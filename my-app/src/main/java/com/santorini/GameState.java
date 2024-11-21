@@ -6,10 +6,12 @@ public final class GameState {
     private final CellState[] cells;
     private final String currentPlayer;
     private static final int SIDE = 5;
+    private final String action;
 
-    private GameState(CellState[] cells, String currentPlayer) {
+    private GameState(CellState[] cells, String currentPlayer, String action) {
         this.cells = cells;
         this.currentPlayer = currentPlayer;
+        this.action = action;
     }
 
     /**
@@ -21,7 +23,8 @@ public final class GameState {
     public static GameState forGame(Game game) {
         CellState[] cellStates = getCellStates(game);
         String currentPlayer = game.getTurn().toString();
-        return new GameState(cellStates, currentPlayer);
+        String action = game.getCurrentAction();
+        return new GameState(cellStates, currentPlayer, action);
     }
 
     public CellState[] getCells() {
@@ -42,9 +45,10 @@ public final class GameState {
         return """
                 {
                     "cells": %s,
-                    "currentPlayer": "%s"
+                    "currentPlayer": "%s",
+                    "action": "%s"
                 }
-                """.formatted(Arrays.toString(this.cells), this.currentPlayer);
+                """.formatted(Arrays.toString(this.cells), this.currentPlayer, this.action);
     }
 
     /**
@@ -55,7 +59,6 @@ public final class GameState {
      */
     private static CellState[] getCellStates(Game game) {
         Board board = game.getBoard();
-        Player currPlayer = game.getTurn();
         Player[] players = game.getPlayers();
         int boardSize = SIDE;
         CellState[] cellStates = new CellState[boardSize * boardSize];

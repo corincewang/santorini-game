@@ -14,6 +14,7 @@ class App extends React.Component<Props, GameState> {
       cells: [], 
       currentPlayer: 'Player 1',
       winner: null,
+      action: 'place', 
     };
   }
 
@@ -40,20 +41,24 @@ class App extends React.Component<Props, GameState> {
       if (json.error) {
         alert(json.error);
       } else {
-        // 合并新状态到现有状态
         const updatedCells = json.gameState?.cells || [];
   
         const mergedCells = this.state.cells.map((cell) => {
           const updatedCell = updatedCells.find(
             (updated) => updated.x === cell.x && updated.y === cell.y
           );
-          return updatedCell || cell; // 如果有更新的状态，用更新的；否则保留原有状态
+          return updatedCell || cell;
         });
   
         this.setState({
           cells: mergedCells,
           currentPlayer: json.gameState?.currentPlayer || 'Player 1',
         });
+  
+        // 检查是否完成两个工人放置
+        if (json.gameState?.action === 'move') {
+          this.setState({ action: 'move' }); // 切换到移动模式
+        }
       }
     } catch (error) {
       console.error('Failed to place worker:', error);
@@ -65,24 +70,40 @@ class App extends React.Component<Props, GameState> {
     try {
       const response = await fetch(`/play?action=move&x=${x}&y=${y}`);
       const json = await response.json();
-      console.log('Worker moved to:', x, y, 'Response:', json);
   
-      this.setState({
-        cells: json.gameState?.cells || [],
-        currentPlayer: json.gameState?.currentPlayer || 'Player 1',
-      });
+      if (json.error) {
+        alert(json.error);
+      } else {
+        const updatedCells = json.gameState?.cells || [];
+  
+        const mergedCells = this.state.cells.map((cell) => {
+          const updatedCell = updatedCells.find(
+            (updated) => updated.x === cell.x && updated.y === cell.y
+          );
+          return updatedCell || cell;
+        });
+  
+        this.setState({
+          cells: mergedCells,
+          currentPlayer: json.gameState?.currentPlayer || 'Player 1',
+        });
+      }
     } catch (error) {
       console.error('Failed to move worker:', error);
     }
   };
+  
 
   handleCellClick = (cell: Cell) => {
-    if (cell.playable) {
+    if (this.state.action === 'place' && cell.playable) {
       this.placeWorker(cell.x, cell.y);
+    } else if (this.state.action === 'move' && cell.playable) {
+      this.moveWorker(cell.x, cell.y);
     } else {
-      console.log(`Cell (${cell.x}, ${cell.y}) is not playable.`);
+      console.log(`Cell (${cell.x}, ${cell.y}) is not playable for the current action.`);
     }
   };
+  
 
   createCell = (cell: Cell, index: number): React.ReactNode => {
     let cellClass = '';
@@ -127,11 +148,12 @@ class App extends React.Component<Props, GameState> {
         </div>
         <div id="bottombar">
           <button onClick={this.newGame}>New Game</button>
-          <button>Undo</button>
+
         </div>
       </div>
     );
   }
+  
 }
 
 export default App;

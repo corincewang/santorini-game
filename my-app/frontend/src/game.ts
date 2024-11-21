@@ -6,11 +6,14 @@ export interface Cell {
     worker?: string; // Which player owns the worker on this cell, if any
     level: number; // Building level (0-3)
     player: string;
+    
   }
   
   export interface GameState {
     cells: Cell[];
     currentPlayer: string;
     winner: string | null;
+    action: string;
+    
   }
   

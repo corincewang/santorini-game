@@ -45,6 +45,8 @@ public class App extends NanoHTTPD {
         Map<String, String> params = session.getParms();
         String responseText = "";
 
+     
+
         if (uri.equals("/newgame")) {
             // Initialize a new game
             Player player1 = new Player();
@@ -65,43 +67,92 @@ public class App extends NanoHTTPD {
                 """.formatted(gameState.toString());
         } 
         else if (uri.equals("/play")) {
+              
+           
             if (params.containsKey("action")) {
                 String action = params.get("action");
-
                 try {
                     int x = Integer.parseInt(params.getOrDefault("x", "-1"));
                     int y = Integer.parseInt(params.getOrDefault("y", "-1"));
-
+                    
+                   
                     if ("place".equals(action)) {
-                        Player currentPlayer = this.game.getTurn();
+                        
 
+                        Player currentPlayer = this.game.getTurn();
                         // Check if the current player has placed less than 2 workers
                         int placedWorkers = playerWorkerCount.getOrDefault(currentPlayer, 0);
-                        if (placedWorkers >= 2) {
-                            responseText = """
-                                {
-                                    "error": "Player %s has already placed 2 workers."
-                                }
-                                """.formatted(currentPlayer);
-                        } else {
-                            // Place the worker
-                            this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
-                            playerWorkerCount.put(currentPlayer, placedWorkers + 1);
-                        
-                        
+                      
+                        // Place the worker
+                        this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
+                        playerWorkerCount.put(currentPlayer, placedWorkers + 1);
 
-                            responseText = """
-                                {
-                                    "message": "Worker placed at (%d, %d).",
-                                    "gameState": %s
-                                }
-                                """.formatted(x, y, GameState.forGame(this.game).toString());
-                        }
+                        responseText = """
+                            {
+                                "message": "Worker placed at (%d, %d).",
+                                "gameState": %s
+                            }
+                            """.formatted(x, y, GameState.forGame(this.game).toString());
+                    
                          // If the player placed 2 workers, switch turn
-                         if (playerWorkerCount.get(currentPlayer) == 2) {
+                        if (playerWorkerCount.get(currentPlayer) == 2) {
                             this.game.switchTurn();
                         }
+                        if (playerWorkerCount.get(this.game.getPlayers()[0]) >= 2 && playerWorkerCount.get(this.game.getPlayers()[1]) >= 2) {
+                            this.game.setCurrentAction("move");
+                            System.out.println("move");
+                            responseText = """
+                            {
+                                "message": "All workers placed. Moving to 'move' phase.",
+                                "gameState": %s
+                            }
+                            """.formatted(GameState.forGame(this.game).toString());
+                        }   
+                      
                     } 
+                    else if ("move".equals(action)) {
+                        try {
+                            Player currentPlayer = this.game.getTurn();
+                            Worker worker = currentPlayer.selectWorker(0); // 假设始终选择第一个工人
+                            Cell targetCell = this.game.getBoard().getCell(x, y);
+                    
+                            if (worker.canMoveToCell(targetCell)) {
+                                this.game.moveWorker(worker, targetCell);
+
+                                if (currentPlayer.checkWinStatus()) {
+                                    responseText = """
+                                        {
+                                            "message": "Worker moved to (%d, %d). Player %s wins!",
+                                            "gameState": %s
+                                        }
+                                        """.formatted(x, y, currentPlayer.toString(), GameState.forGame(this.game).toString());
+                                    this.game.setEndState(); // 结束游戏
+                                } else {
+                                    // 如果没有胜利，切换到下一个玩家的回合
+                                    this.game.switchTurn();
+                                    responseText = """
+                                        {
+                                            "message": "Worker moved to (%d, %d).",
+                                            "gameState": %s
+                                        }
+                                        """.formatted(x, y, GameState.forGame(this.game).toString());
+                                }
+                            } else {
+                                responseText = """
+                                    {
+                                        "error": "Invalid move. Worker cannot move to the target cell."
+                                    }
+                                    """;
+                            }
+                        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                            responseText = """
+                                {
+                                    "error": "Invalid or missing coordinates for move action."
+                                }
+                                """;
+                        }
+                    }
+                    
                     else {
                         responseText = """
                             {
@@ -134,44 +185,5 @@ public class App extends NanoHTTPD {
         return newFixedLengthResponse(Response.Status.OK, "application/json", responseText);
     }
 
-    
 
-    private void handlePlaceWorker(int x, int y) {
-        Player currentPlayer = this.game.getTurn();
-        Board board = this.game.getBoard();
-        currentPlayer.placeWorker(board.getCell(x, y), null, board); 
-    }
-
-    private void handleMoveWorker(int x, int y) {
-        Player currentPlayer = this.game.getTurn();
-        Worker worker = currentPlayer.selectWorker(0); // Select the first worker
-        Cell targetCell = this.game.getBoard().getCell(x, y);
-
-        if (worker.canMoveToCell(targetCell)) {
-            this.game.moveWorker(worker, targetCell);
-        } else {
-            throw new IllegalArgumentException("Move not allowed to the target cell.");
-        }
-    }
-
-    private void handleBuildBlock(int x, int y) {
-        Player currentPlayer = this.game.getTurn();
-        Worker worker = currentPlayer.selectWorker(0); // Select the first worker
-        Cell targetCell = this.game.getBoard().getCell(x, y);
-
-        if (worker.canBuildToCell(targetCell)) {
-            worker.buildBlock(targetCell);
-        } else {
-            throw new IllegalArgumentException("Cannot build at the target cell.");
-        }
-    }
-
-    private String buildGameStateResponse(String message, int x, int y) {
-        return """
-            {
-                "message": "%s",
-                "gameState": %s
-            }
-            """.formatted(String.format(message, x, y), GameState.forGame(this.game).toString());
-    }
 }

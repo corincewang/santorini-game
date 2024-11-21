@@ -10,8 +10,8 @@ public class Game {
     private final Board board;
     private final Player[] players;
     private Player turn;
-    @SuppressWarnings("unused")
     private boolean endState;
+    private String currentAction; 
 
     /**
      * Constructs a new Game instance with two players and initializes the board.
@@ -25,6 +25,7 @@ public class Game {
         this.players = new Player[]{player1, player2};
         this.turn = player1; 
         this.endState = false; 
+        this.currentAction = "place";
     }
 
     public Player[] getPlayers(){
@@ -49,6 +50,14 @@ public class Game {
         return board;
     }
 
+    public String getCurrentAction() {
+        return this.currentAction;
+    }
+
+    public void setCurrentAction(String action) {
+        this.currentAction = action;
+    }
+
     /**
      * Checks if the game has reached an end condition. Determines a winner if either 
      * player has achieved a win or if the opposing player has met a lose condition.
@@ -71,6 +80,10 @@ public class Game {
             return player2;
         }
         return null;
+    }
+
+    public void setEndState(){
+        endState = true;
     }
 
     /**
