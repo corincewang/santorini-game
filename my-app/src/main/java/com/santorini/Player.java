@@ -27,12 +27,18 @@ public class Player {
      * @param cell2 the cell for the second worker
      * @param board the game board
      */
-    public void placeWorker(Cell cell1, Cell cell2, Board board){
-        this.workers[0] = new Worker(cell1, board);
-        this.workers[1] = new Worker(cell2, board);
-        cell1.setOccupiedWorker(this.workers[0]); 
-        cell2.setOccupiedWorker(this.workers[1]); 
+    public void placeWorker(Cell cell1, Cell cell2, Board board) {
+        if (cell1 != null) {
+            this.workers[0] = new Worker(cell1, board);
+            cell1.setOccupiedWorker(this.workers[0]); 
+        }
+    
+        if (cell2 != null) {
+            this.workers[1] = new Worker(cell2, board);
+            cell2.setOccupiedWorker(this.workers[1]); 
+        }
     }
+    
 
     /**
      * Checks if the player has met the winning condition (worker reaches maximum height).
