@@ -10,6 +10,8 @@ public class App extends NanoHTTPD {
     private static final int SITE_NUM = 8080;
     private Game game;
     private final Map<Player, Integer> playerWorkerCount = new HashMap<>();
+    private Map<Player, Worker> selectedWorkers = new HashMap<>();
+
 
     public static void main(String[] args) {
         try {
@@ -27,8 +29,8 @@ public class App extends NanoHTTPD {
     public App() throws IOException {
         super(SITE_NUM);
 
-        Player player1 = new Player();
-        Player player2 = new Player();
+        Player player1 = new Player("Player1");
+        Player player2 = new Player("Player2");
         this.game = new Game(player1, player2);
 
         // Initialize worker counts for both players
@@ -49,8 +51,8 @@ public class App extends NanoHTTPD {
 
         if (uri.equals("/newgame")) {
             // Initialize a new game
-            Player player1 = new Player();
-            Player player2 = new Player();
+            Player player1 = new Player("Player1");
+            Player player2 = new Player("Player2");
             this.game = new Game(player1, player2);
 
             // Reset worker counts
@@ -67,84 +69,134 @@ public class App extends NanoHTTPD {
                 """.formatted(gameState.toString());
         } 
         else if (uri.equals("/play")) {
-              
-           
             if (params.containsKey("action")) {
                 String action = params.get("action");
                 try {
                     int x = Integer.parseInt(params.getOrDefault("x", "-1"));
                     int y = Integer.parseInt(params.getOrDefault("y", "-1"));
-                    
-                   
-                    if ("place".equals(action)) {
                         
-
+                    if ("place".equals(action)) {
                         Player currentPlayer = this.game.getTurn();
-                        // Check if the current player has placed less than 2 workers
                         int placedWorkers = playerWorkerCount.getOrDefault(currentPlayer, 0);
-                      
-                        // Place the worker
-                        this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
-                        playerWorkerCount.put(currentPlayer, placedWorkers + 1);
-
-                        responseText = """
-                            {
-                                "message": "Worker placed at (%d, %d).",
-                                "gameState": %s
-                            }
-                            """.formatted(x, y, GameState.forGame(this.game).toString());
-                    
-                         // If the player placed 2 workers, switch turn
-                        if (playerWorkerCount.get(currentPlayer) == 2) {
-                            this.game.switchTurn();
-                        }
-                        if (playerWorkerCount.get(this.game.getPlayers()[0]) >= 2 && playerWorkerCount.get(this.game.getPlayers()[1]) >= 2) {
-                            this.game.setCurrentAction("move");
-                            System.out.println("move");
-                            responseText = """
-                            {
-                                "message": "All workers placed. Moving to 'move' phase.",
-                                "gameState": %s
-                            }
-                            """.formatted(GameState.forGame(this.game).toString());
-                        }   
-                      
-                    } 
-                    else if ("move".equals(action)) {
-                        try {
-                            Player currentPlayer = this.game.getTurn();
-                            Worker worker = currentPlayer.selectWorker(0); // 假设始终选择第一个工人
-                            Cell targetCell = this.game.getBoard().getCell(x, y);
-                    
-                            if (worker.canMoveToCell(targetCell)) {
-                                this.game.moveWorker(worker, targetCell);
-
-                                if (currentPlayer.checkWinStatus()) {
-                                    responseText = """
-                                        {
-                                            "message": "Worker moved to (%d, %d). Player %s wins!",
-                                            "gameState": %s
-                                        }
-                                        """.formatted(x, y, currentPlayer.toString(), GameState.forGame(this.game).toString());
-                                    this.game.setEndState(); // 结束游戏
-                                } else {
-                                    // 如果没有胜利，切换到下一个玩家的回合
-                                    this.game.switchTurn();
-                                    responseText = """
-                                        {
-                                            "message": "Worker moved to (%d, %d).",
-                                            "gameState": %s
-                                        }
-                                        """.formatted(x, y, GameState.forGame(this.game).toString());
-                                }
-                            } else {
-                                responseText = """
+        
+                        if (placedWorkers < 2) {
+                            this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null,  this.game.getBoard());
+                            placedWorkers++;
+                            playerWorkerCount.put(currentPlayer, placedWorkers);
+        
+                            if (placedWorkers == 2 && currentPlayer.equals(this.game.getPlayers()[0])) {
+                                this.game.switchTurn(); // Switch to Player 2 after Player 1 places two workers
+                                responseText = String.format("""
                                     {
-                                        "error": "Invalid move. Worker cannot move to the target cell."
+                                        "message": "Player 1 has placed all workers. Now it's Player 2's turn.",
+                                        "gameState": %s
                                     }
-                                    """;
+                                    """, GameState.forGame(this.game).toString());
+                            } else if (placedWorkers == 2 && currentPlayer.equals(this.game.getPlayers()[1])) {
+                                this.game.switchTurn();
+                                this.game.setCurrentAction("chooseWorker"); // Move to the next phase after Player 2 places their workers
+                                responseText = String.format("""
+                                    {
+                                        "message": "All workers placed by both players. Moving to 'move' phase.",
+                                        "gameState": %s
+                                    }
+                                    """, GameState.forGame(this.game).toString());
+                            } else {
+                                responseText = String.format("""
+                                    {
+                                        "message": "Worker placed at (%d, %d) by %s.",
+                                        "gameState": %s
+                                    }
+                                    """, x, y, currentPlayer, GameState.forGame(this.game).toString());
+                            }
+                        } else {
+                            responseText = """
+                                {
+                                    "error": "No more workers to place for this player."
+                                }
+                                """;
+                        }
+                    } 
+                    
+                    else if ("chooseWorker".equals(action)) {
+                        try {
+                            Player currentPlayer = this.game.getTurn();                      
+                            Cell selectedCell = this.game.getBoard().getCell(x, y);
+                            Worker worker = selectedCell.getOccupiedWorker();
+                            // System.out.println(worker);
+                            // System.out.println( worker.getPlayer().equals(currentPlayer));
+                            if (worker != null && worker.getPlayer().equals(currentPlayer)) {
+                                selectedWorkers.put(currentPlayer, worker);
+                                System.out.println(selectedWorkers);
+                                responseText = String.format("""
+                                    {
+                                        "message": "Worker at (%d, %d) selected successfully.",
+                                        "gameState": %s
+                                    }
+                                    """, x, y, GameState.forGame(this.game).toString());
+                            } else {
+                                responseText = String.format("""
+                                    {
+                                        "error": "No worker at (%d, %d) belongs to you or no worker present."
+                                    }
+                                    """, x, y);
                             }
                         } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                            responseText = """
+                                {
+                                    "error": "Invalid or missing coordinates for choosing worker."
+                                }
+                                """;
+                        }
+                    }
+                    
+                
+                    else if ("move".equals(action)) {
+                        try {
+                            Worker selectedWorker = selectedWorkers.get(this.game.getTurn());
+
+                            Player currentPlayer = this.game.getTurn();
+                            
+                            if (selectedWorker != null) {
+                                Cell targetCell = this.game.getBoard().getCell(x, y);
+                                if (selectedWorker.canMoveToCell(targetCell)) {
+                                    this.game.moveWorker(selectedWorker, targetCell);
+                                    selectedWorkers.remove(this.game.getTurn()); 
+                                    if (currentPlayer.checkWinStatus()) {
+                                        responseText = """
+                                            {
+                                                "message": "Worker moved to (%d, %d). Player %s wins!",
+                                                "gameState": %s
+                                            }
+                                            """.formatted(x, y, currentPlayer.toString(), GameState.forGame(this.game).toString());
+                                        this.game.setEndState();
+                                    } else {
+                                        this.game.switchTurn();
+                                        responseText = """
+                                            {
+                                                "message": "Worker moved to (%d, %d).",
+                                                "gameState": %s
+                                            }
+                                            """.formatted(x, y, GameState.forGame(this.game).toString());
+                                    }
+                                } 
+                                else {
+                                    responseText = """
+                                        {
+                                            "error": "Invalid move. Worker cannot move to the target cell."
+                                        }
+                                        """;
+                                }
+                        }
+                        else {
+                            responseText = """
+                                {
+                                    "error": "No worker selected. Please select a worker first."
+                                }
+                                """;
+                        }
+                     } 
+                     catch (NumberFormatException | IndexOutOfBoundsException e) {
                             responseText = """
                                 {
                                     "error": "Invalid or missing coordinates for move action."

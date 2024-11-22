@@ -55,9 +55,8 @@ class App extends React.Component<Props, GameState> {
           currentPlayer: json.gameState?.currentPlayer || 'Player 1',
         });
   
-        // 检查是否完成两个工人放置
-        if (json.gameState?.action === 'move') {
-          this.setState({ action: 'move' }); // 切换到移动模式
+        if (json.gameState?.action === 'chooseWorker') {
+          this.setState({ action: 'chooseWorker' }); 
         }
       }
     } catch (error) {
@@ -65,6 +64,16 @@ class App extends React.Component<Props, GameState> {
     }
   };
   
+  // 选择工人
+  chooseWorker = async (x, y) => {
+    try {
+      const response = await fetch(`/play?action=chooseWorker&x=${x}&y=${y}`);
+      const json = await response.json();
+      this.setState({ ...json, action: 'move' });  // 选择后切换到移动动作
+    } catch (error) {
+        console.error("Error chooseing worker:", error);
+    }
+  };
   
   moveWorker = async (x: number, y: number): Promise<void> => {
     try {
@@ -95,14 +104,28 @@ class App extends React.Component<Props, GameState> {
   
 
   handleCellClick = (cell: Cell) => {
-    if (this.state.action === 'place' && cell.playable) {
-      this.placeWorker(cell.x, cell.y);
-    } else if (this.state.action === 'move' && cell.playable) {
-      this.moveWorker(cell.x, cell.y);
-    } else {
-      console.log(`Cell (${cell.x}, ${cell.y}) is not playable for the current action.`);
+    const { action, currentPlayer } = this.state;
+    console.log("current action: ", action)
+    console.log("cell.player: ", cell.player)
+    console.log("currentPlayer: ", currentPlayer)
+
+    if (action === 'chooseWorker' && cell.player === currentPlayer) {
+        this.chooseWorker(cell.x, cell.y);
+        
     }
-  };
+    // 检查是否是放置工人的阶段并且该格子没有工人
+    else if (action === 'place' && !cell.worker) {
+        this.placeWorker(cell.x, cell.y);
+    }
+    // 检查是否是移动工人的阶段并且该格子是可以移动到的
+    else if (action === 'move' && cell.playable) {
+        this.moveWorker(cell.x, cell.y);
+    }
+    // 其他情况输出日志
+    else {
+        console.log(`Action ${action} not permitted on cell (${cell.x}, ${cell.y}).`);
+    }
+};
   
 
   createCell = (cell: Cell, index: number): React.ReactNode => {

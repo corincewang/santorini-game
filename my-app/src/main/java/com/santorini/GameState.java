@@ -22,7 +22,7 @@ public final class GameState {
      */
     public static GameState forGame(Game game) {
         CellState[] cellStates = getCellStates(game);
-        String currentPlayer = game.getTurn().toString();
+        String currentPlayer = game.getTurn().getName();
         String action = game.getCurrentAction();
         return new GameState(cellStates, currentPlayer, action);
     }

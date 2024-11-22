@@ -7,17 +7,25 @@ package com.santorini;
  */
 public class Player {
     private final Worker[] workers;
+    private String name; 
     private boolean winStatus;
     private boolean loseStatus;
     private static final int MAX_HEIGHT = 3;
 
      /**
      * Initializes a new player with an array of two workers and initial win and lose status set to false.
+     * @param name the name for the player
      */
-    public Player() {
+    
+    public Player(String name) {
         this.workers = new Worker[2];
         this.winStatus = false;
         this.loseStatus = false;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
@@ -90,5 +98,8 @@ public class Player {
         return this.workers[workerNum];
     }
 
+    public Worker setSelectedWorker(Worker worker){
+        return worker;
+    }
 
 }

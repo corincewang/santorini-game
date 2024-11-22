@@ -16,8 +16,8 @@ public class AppTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        player1 = new Player();
-        player2 = new Player();
+        player1 = new Player("PlayerA");
+        player2 = new Player("PlayerB");
         game = new Game(player1, player2);
         board = game.getBoard();
         
