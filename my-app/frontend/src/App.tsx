@@ -64,7 +64,6 @@ class App extends React.Component<Props, GameState> {
     }
   };
   
-  // 选择工人
   chooseWorker = async (x, y) => {
     try {
       const response = await fetch(`/play?action=chooseWorker&x=${x}&y=${y}`);
@@ -74,6 +73,7 @@ class App extends React.Component<Props, GameState> {
         console.error("Error chooseing worker:", error);
     }
   };
+
   
   moveWorker = async (x: number, y: number): Promise<void> => {
     try {
@@ -95,6 +95,7 @@ class App extends React.Component<Props, GameState> {
         this.setState({
           cells: mergedCells,
           currentPlayer: json.gameState?.currentPlayer || 'Player 1',
+          action: 'build'  // 自动切换到建筑动作
         });
       }
     } catch (error) {
@@ -103,29 +104,51 @@ class App extends React.Component<Props, GameState> {
   };
   
 
+  buildBlock = async (x: number, y: number): Promise<void> => {
+    try {
+      const response = await fetch(`/play?action=build&x=${x}&y=${y}`);
+      const json = await response.json();
+  
+      if (json.error) {
+        alert(json.error);
+      } else {
+        const updatedCells = json.gameState?.cells || [];
+  
+        const mergedCells = this.state.cells.map((cell) => {
+          const updatedCell = updatedCells.find(
+            (updated) => updated.x === cell.x && updated.y === cell.y
+          );
+          return updatedCell || cell;
+        });
+  
+        this.setState({
+          cells: mergedCells,
+          currentPlayer: json.gameState?.currentPlayer || 'Player 1',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to build block:', error);
+    }
+  };
+  
+  
+
   handleCellClick = (cell: Cell) => {
     const { action, currentPlayer } = this.state;
-    console.log("current action: ", action)
-    console.log("cell.player: ", cell.player)
-    console.log("currentPlayer: ", currentPlayer)
-
+  
     if (action === 'chooseWorker' && cell.player === currentPlayer) {
-        this.chooseWorker(cell.x, cell.y);
-        
+      this.chooseWorker(cell.x, cell.y);
+    } else if (action === 'place' && !cell.worker) {
+      this.placeWorker(cell.x, cell.y);
+    } else if (action === 'move' && cell.playable) {
+      this.moveWorker(cell.x, cell.y);
+    } else if (action === 'build' && cell.playable) {
+      this.buildBlock(cell.x, cell.y);
+    } else {
+      console.log(`Action ${action} not permitted on cell (${cell.x}, ${cell.y}).`);
     }
-    // 检查是否是放置工人的阶段并且该格子没有工人
-    else if (action === 'place' && !cell.worker) {
-        this.placeWorker(cell.x, cell.y);
-    }
-    // 检查是否是移动工人的阶段并且该格子是可以移动到的
-    else if (action === 'move' && cell.playable) {
-        this.moveWorker(cell.x, cell.y);
-    }
-    // 其他情况输出日志
-    else {
-        console.log(`Action ${action} not permitted on cell (${cell.x}, ${cell.y}).`);
-    }
-};
+  };
+  
   
 
   createCell = (cell: Cell, index: number): React.ReactNode => {
