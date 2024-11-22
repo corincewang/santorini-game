@@ -113,6 +113,8 @@ class App extends React.Component<Props, GameState> {
         alert(json.error);
       } else {
         const updatedCells = json.gameState?.cells || [];
+        const currentPlayer = json.gameState?.currentPlayer || 'Player 1';
+        const nextAction = json.gameState?.action || 'chooseWorker'; // 从后端获取下一步动作
   
         const mergedCells = this.state.cells.map((cell) => {
           const updatedCell = updatedCells.find(
@@ -123,7 +125,8 @@ class App extends React.Component<Props, GameState> {
   
         this.setState({
           cells: mergedCells,
-          currentPlayer: json.gameState?.currentPlayer || 'Player 1',
+          currentPlayer: currentPlayer,
+          action: nextAction  // 设置为后端指定的下一个动作
         });
       }
     } catch (error) {
@@ -150,26 +153,33 @@ class App extends React.Component<Props, GameState> {
   };
   
   
-
-  createCell = (cell: Cell, index: number): React.ReactNode => {
-    let cellClass = '';
+  createCell = (cell, index) => {
+    let cellClass = 'board-cell';
+    let content = ''; // 内容初始化为空，用于显示高度或其他信息
+  
     if (cell.player === 'Player1') {
-      cellClass = 'player-one';
+      cellClass += ' player-one';
+      content = cell.height; // 显示高度
     } else if (cell.player === 'Player2') {
-      cellClass = 'player-two';
+      cellClass += ' player-two';
+      content = cell.height; // 显示高度
     } else if (cell.playable) {
-      cellClass = 'playable';
+      cellClass += ' playable';
+      content = cell.height > 0 ? cell.height : ''; // 如果高度大于0则显示
     }
   
     return (
       <div
         key={index}
-        className={`board-cell ${cellClass}`}
+        className={cellClass}
         onClick={() => this.handleCellClick(cell)}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', border: '1px solid #ccc', fontSize: '16px' }}
       >
+        {content}
       </div>
     );
   };
+  
   
 
   componentDidMount(): void {

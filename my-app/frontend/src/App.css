@@ -1,59 +1,59 @@
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
-  #root {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  h1 {
-    color: #4caf50;
-    font-size: 36px;
-    margin-bottom: 10px;
-    text-align: center;
-  }
-  
-  h2 {
-    font-size: 24px;
-    margin: 0;
-    text-align: center;
-  }
-  
-  /* Game Board */
-  #board {
-    display: grid;
-    grid-template-columns: repeat(5, 60px); /* Adjust cell size */
-    grid-template-rows: repeat(5, 60px);
-    gap: 10px;
-    margin: 20px auto;
-    justify-content: center;
-  }
-  
-  #board div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  a {
-    text-decoration: none;
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  color: #4caf50;
+  font-size: 36px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 24px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Game Board */
+#board {
+  display: grid;
+  grid-template-columns: repeat(5, 60px); /* Adjust cell size */
+  grid-template-rows: repeat(5, 60px);
+  gap: 10px;
+  margin: 20px auto;
+  justify-content: center;
+}
+
+#board div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+a {
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 
 /* Game Board Cell */
 .board-cell {
@@ -65,89 +65,81 @@ body {
   transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
-  
-  /* Hover effect for playable cells */
-    .board-cell:hover {
-    background-color: #e0f7fa;
-    transform: scale(1.05);
-    cursor: pointer;
-    }
+/* Hover effect for playable cells */
+.board-cell:hover {
+  background-color: #e0f7fa;
+  transform: scale(1.05);
+  cursor: pointer;
+}
 
-  
-  .board-cell.occupied {
-    background-color: #ffccbc;
-    border-color: #ff7043;
-  }
-  
-  .board-cell.dome {
-    background-color: #90caf9;
-    border-color: #1976d2;
-  }
-  
-  .board-cell.worker {
-    background-color: #81c784;
-    border-color: #388e3c;
-    font-weight: bold;
-    color: #fff;
-  }
-  
+.board-cell.occupied {
+  background-color: #ffccbc;
+  border-color: #ff7043;
+}
+
+.board-cell.dome {
+  background-color: #90caf9;
+  border-color: #1976d2;
+}
+
+.board-cell.worker {
+  background-color: #81c784;
+  border-color: #388e3c;
+  font-weight: bold;
+  color: #fff;
+}
+
 /* Player 1 worker in the cell */
 .board-cell.player-one {
-    background-color: #f0a500; /* Player 1 color */
-    border-color: #d88b00; /* Player 1 border color */
-  }
-  
-  /* Player 2 worker in the cell */
-  .board-cell.player-two {
-    background-color: #0077b6; /* Player 2 color */
-    border-color: #005b88; /* Player 2 border color */
-  }
+  background-color: #f0a500; /* Player 1 color */
+  border-color: #d88b00; /* Player 1 border color */
+}
 
-
-
-
+/* Player 2 worker in the cell */
+.board-cell.player-two {
+  background-color: #0077b6; /* Player 2 color */
+  border-color: #005b88; /* Player 2 border color */
+}
 
 /* Playable cell hover color */
 .board-cell.playable:hover {
-    background-color: #a5d6a7; /* Playable hover color */
-    cursor: pointer;
-  }
-  
+  background-color: #a5d6a7; /* Playable hover color */
+  cursor: pointer;
+}
 
-  /* Remove worker label */
-  .worker-label {
-    display: none; /* Hide the W1/W2 text */
-  }
+/* Remove worker label */
+.worker-label {
+  display: none; /* Hide the W1/W2 text */
+}
 
-  /* Bottom Bar */
-  #bottombar {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-  }
-  
-  #bottombar button {
-    background-color: #4caf50;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  #bottombar button:hover {
-    background-color: #388e3c;
-  }
-  
-  #bottombar button:active {
-    background-color: #2e7d32;
-  }
-  
-  /* Winner Message */
-  h2.winner {
-    color: #ff7043;
-  }
-  
+/* Bottom Bar */
+#bottombar {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+#bottombar button {
+  background-color: #4caf50;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#bottombar button:hover {
+  background-color: #388e3c;
+}
+
+#bottombar button:active {
+  background-color: #2e7d32;
+}
+
+/* Winner Message */
+h2.winner {
+  color: #ff7043;
+}

@@ -57,7 +57,7 @@ public class Player {
         // System.out.println("workers");
         // System.out.println(this.getWorkers() );
         for (Worker worker : this.getWorkers()) {
-            // System.out.println(worker);
+            System.out.println("checking win status");
             if (worker == null) {
                 continue;  // Skip to the next iteration if the worker is null
             }

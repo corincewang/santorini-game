@@ -207,7 +207,7 @@ public class App extends NanoHTTPD {
         } else {
             return """
                 {
-                    "error": "No worker selected. Please select a worker first."
+                    "error": "In Move, No worker selected. Please select a worker first."
                 }
                 """;
         }
@@ -221,7 +221,7 @@ public class App extends NanoHTTPD {
         if (selectedWorker == null) {
             return """
                 {
-                    "error": "No worker selected. Please select a worker first."
+                    "error": "In Build, No worker selected. Please select a worker first."
                 }
                 """;
         }
@@ -230,9 +230,13 @@ public class App extends NanoHTTPD {
     
         if (selectedWorker.canBuildToCell(targetCell)) {
             selectedWorker.buildBlock(targetCell);
+            selectedWorkers.remove(currentPlayer);  // 清除当前选中的工人
+            this.game.switchTurn();  // 切换到下一个玩家
+            this.game.setCurrentAction("chooseWorker");  // 设置下一个动作为选择工人
+    
             return String.format("""
                 {
-                    "message": "Worker built on cell (%d, %d).",
+                    "message": "Worker built on cell (%d, %d). Switch Turn to next player!",
                     "gameState": %s
                 }
                 """, x, y, GameState.forGame(this.game).toString());
