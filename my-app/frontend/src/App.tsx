@@ -17,6 +17,7 @@ class App extends React.Component<Props, GameState> {
       currentPlayer: 'Player 1',
       winner: null,
       action: 'place', 
+      showWinner: false,
     };
   }
 
@@ -81,7 +82,18 @@ class App extends React.Component<Props, GameState> {
     try {
       const response = await fetch(`/play?action=move&x=${x}&y=${y}`);
       const json = await response.json();
-  
+
+      console.log(response)
+      console.log('Move Worker Response:', json);
+      console.log(json.gameState.endState);
+      // Handle game end state
+      if (json.gameState.endState) {
+        alert(`${json.winner} wins! Game Over.`);
+        this.setState({
+            winner: json.winner,
+            showWinner: true,
+        });
+      }
       if (json.error) {
         alert(json.error);
       } else {
@@ -97,8 +109,10 @@ class App extends React.Component<Props, GameState> {
         this.setState({
           cells: mergedCells,
           currentPlayer: json.gameState?.currentPlayer || 'Player 1',
-          action: 'build'  // 自动切换到建筑动作
+          action: 'build'  
         });
+
+       
       }
     } catch (error) {
       console.error('Failed to move worker:', error);
@@ -184,6 +198,26 @@ class App extends React.Component<Props, GameState> {
     );
   };
   
+
+  renderWinnerModal = () => {
+    if (!this.state.showWinner) return null;
+
+    return (
+        <div className="modal">
+            <div className="modal-content">
+                <h2>Congratulations!</h2>
+                <p>{this.state.winner} Wins!</p>
+                <button onClick={this.closeModal}>Close</button>
+            </div>
+        </div>
+    );
+};
+
+closeModal = () => {
+    this.setState({ showWinner: false });
+    // Optionally reset the game or handle additional logic here
+};
+
   componentDidMount(): void {
     if (!this.initialized) {
       this.newGame();
@@ -192,25 +226,25 @@ class App extends React.Component<Props, GameState> {
   }
 
   render(): React.ReactNode {
-    const cells = this.state.cells || [];
+    const { cells, winner, showWinner, currentPlayer } = this.state;
     return (
-      <div>
-        <h1>Santorini Game</h1>
-        {this.state.winner ? (
-          <h2>{this.state.winner} Wins!</h2>
-        ) : (
-          <h2>Current Turn: {this.state.currentPlayer}</h2>
-        )}
-        <div id="board">
-          {cells.map((cell, i) => this.createCell(cell, i))}
+        <div>
+            <h1>Santorini Game</h1>
+            {showWinner ? (
+                <h2>{currentPlayer} Wins</h2>
+            ) : (
+                <h2>Current Turn: {currentPlayer}</h2>
+            )}
+            <div id="board">
+                {cells.map((cell, i) => this.createCell(cell, i))}
+            </div>
+            <div id="bottombar">
+                <button onClick={this.newGame}>New Game</button>
+            </div>
         </div>
-        <div id="bottombar">
-          <button onClick={this.newGame}>New Game</button>
-
-        </div>
-      </div>
     );
-  }
+}
+
   
 }
 

@@ -101,7 +101,6 @@ public class Worker {
 
 
     public boolean checkWin(Worker worker){
-        System.out.println("Checking win status for player" + worker.getPlayer().getName());
         Cell position = worker.getPosition();
         Block block = position.getBlock();
         return block.getHeight() == MAX_HEIGHT;
@@ -122,7 +121,7 @@ public class Worker {
             System.out.println("\n"+ this + " Moved to" + this.position + ", height = " + this.position.getBlock().getHeight());
 
             if (checkWin(this)){
-                System.out.println("Player " + this.player.getName() + " wins!");
+                System.out.println(this.player.getName() + " wins!");
             }
         }
     }

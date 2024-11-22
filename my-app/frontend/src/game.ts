@@ -14,6 +14,7 @@ export interface Cell {
     currentPlayer: string;
     winner: string | null;
     action: string;
+    showWinner: boolean;
     
   }
   

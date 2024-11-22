@@ -62,21 +62,19 @@ public class Game {
      * Checks if the game has reached an end condition. Determines a winner if either 
      * player has achieved a win or if the opposing player has met a lose condition.
      *
-     * @param player1 the first player
-     * @param player2 the second player
      * @return the Player who has won the game, or null if the game has not ended
      */
-    public Player checkGameEnd(Player player1, Player player2){
+    public Player getWinner(){
         // player1 wins
-        if (player1.checkWinStatus() || player2.checkLoseStatus()){
+        Player player1 = players[0];
+        Player player2 = players[1];
+        if (player1.checkWinStatus()){
             endState = true;
-            System.out.println("player1 wins");
             return player1;
         }
         // player2 wins
-        else if (player2.checkWinStatus() || player1.checkLoseStatus()){
+        else if (player2.checkWinStatus()){
             endState = true;
-            System.out.println("player2 wins");
             return player2;
         }
         return null;
@@ -86,6 +84,9 @@ public class Game {
         endState = true;
     }
 
+    public boolean getEndState(){
+        return endState;
+    }
     /**
      * Switches the current turn to the next player.
      */

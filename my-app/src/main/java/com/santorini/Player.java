@@ -55,38 +55,20 @@ public class Player {
      * @return true if the player has won, false otherwise
      */
     public boolean checkWinStatus() {
-        // System.out.println("Checking win status for workers");
         for (Worker worker : this.getWorkers()) {
             if (worker == null) {
                 continue; 
             }
-    
-            Cell position = worker.getPosition();    
-            Block block = position.getBlock();
-            if (block.getHeight() == MAX_HEIGHT) {
-                        this.winStatus = true;
-                        return winStatus;
-                }
+            if (worker.checkWin(worker)) {
+                this.winStatus = true;
+                break;
             }
-    
+
+   
+        }
         return winStatus;  
     }
-    
 
-    /**
-     * Checks if the player has met the losing condition (no valid moves for any worker).
-     *
-     * @return true if the player has lost, false otherwise
-     */
-    public boolean checkLoseStatus() {
-        for (Worker worker : this.getWorkers()) {
-            if (worker.canMoveWorker()) {
-                return loseStatus;
-            }
-        }
-        this.loseStatus = true;
-        return loseStatus;
-    }
 
 
     /**

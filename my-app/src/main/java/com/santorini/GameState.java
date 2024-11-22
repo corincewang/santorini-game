@@ -5,13 +5,17 @@ import java.util.Arrays;
 public final class GameState {
     private final CellState[] cells;
     private final String currentPlayer;
-    private static final int SIDE = 5;
     private final String action;
+    private final boolean endState;  // Indicates if the game has ended
+    private final String winner;     // Name of the winner if the game has ended
+    private static final int SIDE = 5;
 
-    private GameState(CellState[] cells, String currentPlayer, String action) {
+    private GameState(CellState[] cells, String currentPlayer, String action, boolean endState, String winner) {
         this.cells = cells;
         this.currentPlayer = currentPlayer;
         this.action = action;
+        this.endState = endState;
+        this.winner = winner;
     }
 
     /**
@@ -24,7 +28,9 @@ public final class GameState {
         CellState[] cellStates = getCellStates(game);
         String currentPlayer = game.getTurn().getName();
         String action = game.getCurrentAction();
-        return new GameState(cellStates, currentPlayer, action);
+        boolean endState = game.getEndState();
+        String winner = game.getWinner() != null ? game.getWinner().getName() : null;
+        return new GameState(cellStates, currentPlayer, action, endState, winner);
     }
 
     public CellState[] getCells() {
@@ -33,6 +39,14 @@ public final class GameState {
 
     public String getCurrentPlayer() {
         return this.currentPlayer;
+    }
+
+    public boolean isEndState() {
+        return this.endState;
+    }
+
+    public String getWinner() {
+        return this.winner;
     }
 
     /**
@@ -46,9 +60,11 @@ public final class GameState {
                 {
                     "cells": %s,
                     "currentPlayer": "%s",
-                    "action": "%s"
+                    "action": "%s",
+                    "endState": %b,
+                    "winner": "%s"
                 }
-                """.formatted(Arrays.toString(this.cells), this.currentPlayer, this.action);
+                """.formatted(Arrays.toString(this.cells), this.currentPlayer, this.action, this.endState, this.winner);
     }
 
     /**
@@ -72,7 +88,6 @@ public final class GameState {
                 String player = ""; // Identify which player owns the worker
                 if (cell.isOccupied()) {
                     Worker occupiedWorker = cell.getOccupiedWorker();
-
 
                     if (occupiedWorker.getPlayer().equals(players[0])) {
                         player = "Player1";

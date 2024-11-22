@@ -178,13 +178,15 @@ public class App extends NanoHTTPD {
             Cell targetCell = this.game.getBoard().getCell(x, y);
             if (selectedWorker.canMoveToCell(targetCell)) {
                 this.game.moveWorker(selectedWorker, targetCell);
-                if (currentPlayer.checkWinStatus()) {
+                if (selectedWorker.checkWin(selectedWorker)) {
+                    this.game.setEndState();
+                    System.out.println("game ends, endState set!");
                     return """
                         {
-                            "message": "Worker moved to (%d, %d). Player %s wins!",
+                            "message": Game Ends",
                             "gameState": %s
                         }
-                        """.formatted(x, y, currentPlayer, GameState.forGame(this.game).toString());
+                        """.formatted(GameState.forGame(this.game).toString());
                 } else {
        
                     return """
@@ -214,8 +216,7 @@ public class App extends NanoHTTPD {
     private String handleBuildAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         Worker selectedWorker = selectedWorkers.get(currentPlayer);
-        // System.out.println("Worker selected in build: " + selectedWorkers);  
-    
+
         if (selectedWorker == null) {
             return """
                 {
