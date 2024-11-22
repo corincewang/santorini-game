@@ -54,7 +54,13 @@ public class Player {
      * @return true if the player has won, false otherwise
      */
     public boolean checkWinStatus() {
+        // System.out.println("workers");
+        // System.out.println(this.getWorkers() );
         for (Worker worker : this.getWorkers()) {
+            // System.out.println(worker);
+            if (worker == null) {
+                continue;  // Skip to the next iteration if the worker is null
+            }
             if (worker.getPosition().getBlock().getHeight() == MAX_HEIGHT) {
                 this.winStatus = true;
                 return winStatus;

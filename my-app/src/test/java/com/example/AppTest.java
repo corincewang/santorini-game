@@ -17,7 +17,7 @@ public class AppTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         player1 = new Player("PlayerA");
-        player2 = new Player("PlayerB");
+        player2 = new Player("playerB");
         game = new Game(player1, player2);
         board = game.getBoard();
         

@@ -45,9 +45,7 @@ public class App extends NanoHTTPD {
     public Response serve(IHTTPSession session) {
         String uri = session.getUri();
         Map<String, String> params = session.getParms();
-        String responseText = "";
-
-     
+        String responseText = ""; 
 
         if (uri.equals("/newgame")) {
             // Initialize a new game
@@ -123,8 +121,6 @@ public class App extends NanoHTTPD {
                             Player currentPlayer = this.game.getTurn();                      
                             Cell selectedCell = this.game.getBoard().getCell(x, y);
                             Worker worker = selectedCell.getOccupiedWorker();
-                            // System.out.println(worker);
-                            // System.out.println( worker.getPlayer().equals(currentPlayer));
                             if (worker != null && worker.getPlayer().equals(currentPlayer)) {
                                 selectedWorkers.put(currentPlayer, worker);
                                 System.out.println(selectedWorkers);
@@ -154,12 +150,15 @@ public class App extends NanoHTTPD {
                     else if ("move".equals(action)) {
                         try {
                             Worker selectedWorker = selectedWorkers.get(this.game.getTurn());
-
                             Player currentPlayer = this.game.getTurn();
+                            // System.out.println("selectedWorker");
+                            // System.out.println(selectedWorker);
                             
                             if (selectedWorker != null) {
                                 Cell targetCell = this.game.getBoard().getCell(x, y);
+                                System.out.println("canGet Target Cell");
                                 if (selectedWorker.canMoveToCell(targetCell)) {
+                                    System.out.println("canMove");
                                     this.game.moveWorker(selectedWorker, targetCell);
                                     selectedWorkers.remove(this.game.getTurn()); 
                                     if (currentPlayer.checkWinStatus()) {
