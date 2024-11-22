@@ -88,7 +88,6 @@ class App extends React.Component<Props, GameState> {
       console.log(json.gameState.endState);
       // Handle game end state
       if (json.gameState.endState) {
-        alert(`${json.winner} wins! Game Over.`);
         this.setState({
             winner: json.winner,
             showWinner: true,
@@ -171,33 +170,67 @@ class App extends React.Component<Props, GameState> {
     }
   };
   
-
   createCell = (cell, index) => {
     let cellClass = 'board-cell';
-    let content = cell.height > 0 ? cell.height : ''; 
+    let content = ''; // Initialize content as empty
   
+    // Set cell class based on player
     if (cell.player === 'Player1') {
-      cellClass += ' player-one';
+        cellClass += ' player-one';
     } else if (cell.player === 'Player2') {
-      cellClass += ' player-two';
-    } else if (cell.playable) {
-      cellClass += ' playable';
+        cellClass += ' player-two';
     }
-  
-    const domeContent = cell.hasDome ? <img src="/dome.png" alt="Dome" style={{ maxWidth: '100%', maxHeight: '100%' }} /> : content;
-  
+
+    // Display height if available
+    if (cell.height > 0) {
+        content = cell.height;
+    }
+
+    // Style for domed cells (non-playable)
+    if (!cell.playable) {
+        cellClass += ' dome'; // Add 'dome' class for styling
+        content = 'D'; // Display 'D' for dome
+        return (
+            <div
+                key={index}
+                className={cellClass}
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '50px',
+                    height: '50px',
+                    border: '1px solid #ccc',
+                    fontSize: '16px',
+                    backgroundColor: 'lightblue' // Light blue background for dome
+                }}
+            >
+                {content}
+            </div>
+        );
+    }
+
+    // Return cell with standard or player-specific styling
     return (
-      <div
-        key={index}
-        className={cellClass}
-        onClick={() => this.handleCellClick(cell)}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', border: '1px solid #ccc', fontSize: '16px' }}
-      >
-        {domeContent}
-      </div>
+        <div
+            key={index}
+            className={cellClass}
+            onClick={() => this.handleCellClick(cell)}
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '50px',
+                height: '50px',
+                border: '1px solid #ccc',
+                fontSize: '16px'
+            }}
+        >
+            {content}
+        </div>
     );
-  };
-  
+};
+
 
   renderWinnerModal = () => {
     if (!this.state.showWinner) return null;
