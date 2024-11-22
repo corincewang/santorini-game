@@ -178,8 +178,6 @@ public class App extends NanoHTTPD {
             Cell targetCell = this.game.getBoard().getCell(x, y);
             if (selectedWorker.canMoveToCell(targetCell)) {
                 this.game.moveWorker(selectedWorker, targetCell);
-                    // System.out.println("Worker selected in move: " + selectedWorkers);
-
                 if (currentPlayer.checkWinStatus()) {
                     return """
                         {

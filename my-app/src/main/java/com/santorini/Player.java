@@ -48,26 +48,30 @@ public class Player {
     }
     
 
+    //Actually Not using this, instead use a quick win check in Worker Class
     /**
      * Checks if the player has met the winning condition (worker reaches maximum height).
      *
      * @return true if the player has won, false otherwise
      */
     public boolean checkWinStatus() {
-        // System.out.println("workers");
-        // System.out.println(this.getWorkers() );
+        // System.out.println("Checking win status for workers");
         for (Worker worker : this.getWorkers()) {
-            System.out.println("checking win status");
             if (worker == null) {
-                continue;  // Skip to the next iteration if the worker is null
+                continue; 
             }
-            if (worker.getPosition().getBlock().getHeight() == MAX_HEIGHT) {
-                this.winStatus = true;
-                return winStatus;
+    
+            Cell position = worker.getPosition();    
+            Block block = position.getBlock();
+            if (block.getHeight() == MAX_HEIGHT) {
+                        this.winStatus = true;
+                        return winStatus;
+                }
             }
-        }
-        return winStatus;
+    
+        return winStatus;  
     }
+    
 
     /**
      * Checks if the player has met the losing condition (no valid moves for any worker).

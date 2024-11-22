@@ -12,6 +12,7 @@ public class Worker {
     private Cell position;
     private final Board board;
     private static final int SIDE = 5;
+    private static final int MAX_HEIGHT = 3;
     private final Player player;
 
      /**
@@ -99,6 +100,13 @@ public class Worker {
     }
 
 
+    public boolean checkWin(Worker worker){
+        System.out.println("Checking win status for player" + worker.getPlayer().getName());
+        Cell position = worker.getPosition();
+        Block block = position.getBlock();
+        return block.getHeight() == MAX_HEIGHT;
+    }
+
     /**
      * Executes a move of the worker to a specified cell if the move is valid.
      *
@@ -112,6 +120,10 @@ public class Worker {
             newCell.setOccupiedWorker(this);  
             this.position = newCell;  
             System.out.println("\n"+ this + " Moved to" + this.position + ", height = " + this.position.getBlock().getHeight());
+
+            if (checkWin(this)){
+                System.out.println("Player " + this.player.getName() + " wins!");
+            }
         }
     }
 

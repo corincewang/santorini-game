@@ -3,6 +3,8 @@ import './App.css';
 import { GameState, Cell } from './Game';
 import BoardCell from './Cell.tsx';
 
+
+
 interface Props {}
 
 class App extends React.Component<Props, GameState> {
@@ -68,7 +70,7 @@ class App extends React.Component<Props, GameState> {
     try {
       const response = await fetch(`/play?action=chooseWorker&x=${x}&y=${y}`);
       const json = await response.json();
-      this.setState({ ...json, action: 'move' });  // 选择后切换到移动动作
+      this.setState({ ...json, action: 'move' }); 
     } catch (error) {
         console.error("Error chooseing worker:", error);
     }
@@ -114,7 +116,7 @@ class App extends React.Component<Props, GameState> {
       } else {
         const updatedCells = json.gameState?.cells || [];
         const currentPlayer = json.gameState?.currentPlayer || 'Player 1';
-        const nextAction = json.gameState?.action || 'chooseWorker'; // 从后端获取下一步动作
+        const nextAction = json.gameState?.action || 'chooseWorker'; 
   
         const mergedCells = this.state.cells.map((cell) => {
           const updatedCell = updatedCells.find(
@@ -128,6 +130,8 @@ class App extends React.Component<Props, GameState> {
           currentPlayer: currentPlayer,
           action: nextAction  // 设置为后端指定的下一个动作
         });
+
+
       }
     } catch (error) {
       console.error('Failed to build block:', error);
@@ -138,6 +142,7 @@ class App extends React.Component<Props, GameState> {
 
   handleCellClick = (cell: Cell) => {
     const { action, currentPlayer } = this.state;
+
   
     if (action === 'chooseWorker' && cell.player === currentPlayer) {
       this.chooseWorker(cell.x, cell.y);
@@ -152,21 +157,20 @@ class App extends React.Component<Props, GameState> {
     }
   };
   
-  
+
   createCell = (cell, index) => {
     let cellClass = 'board-cell';
-    let content = ''; // 内容初始化为空，用于显示高度或其他信息
+    let content = cell.height > 0 ? cell.height : ''; 
   
     if (cell.player === 'Player1') {
       cellClass += ' player-one';
-      content = cell.height; // 显示高度
     } else if (cell.player === 'Player2') {
       cellClass += ' player-two';
-      content = cell.height; // 显示高度
     } else if (cell.playable) {
       cellClass += ' playable';
-      content = cell.height > 0 ? cell.height : ''; // 如果高度大于0则显示
     }
+  
+    const domeContent = cell.hasDome ? <img src="/dome.png" alt="Dome" style={{ maxWidth: '100%', maxHeight: '100%' }} /> : content;
   
     return (
       <div
@@ -175,13 +179,11 @@ class App extends React.Component<Props, GameState> {
         onClick={() => this.handleCellClick(cell)}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', border: '1px solid #ccc', fontSize: '16px' }}
       >
-        {content}
+        {domeContent}
       </div>
     );
   };
   
-  
-
   componentDidMount(): void {
     if (!this.initialized) {
       this.newGame();
