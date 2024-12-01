@@ -11,6 +11,8 @@ public class Player {
     private boolean winStatus;
     private boolean loseStatus;
     private static final int MAX_HEIGHT = 3;
+    private GodCard godCard; 
+
 
      /**
      * Initializes a new player with an array of two workers and initial win and lose status set to false.
@@ -22,11 +24,9 @@ public class Player {
         this.winStatus = false;
         this.loseStatus = false;
         this.name = name;
+        this.godCard = godCard;
     }
 
-    public String getName() {
-        return name;
-    }
 
     /**
      * Places the player's workers on two specified cells on the board.
@@ -94,4 +94,17 @@ public class Player {
         return worker;
     }
 
+    
+    public String getName() {
+        return name;
+    }
+
+    public void setGodCard(GodCard godCard) {
+        this.godCard = godCard;
+    }
+    
+    public GodCard getGodCard() {
+        return this.godCard;
+    }
+    
 }

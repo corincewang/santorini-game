@@ -49,6 +49,18 @@ public class Worker {
         this.position = cell; 
     }
 
+
+
+    public boolean checkWin(Worker worker){
+        Cell position = worker.getPosition();
+        Block block = position.getBlock();
+        if (player.getGodCard() != null) {
+            return player.getGodCard().checkWinCondition(worker);
+        }
+        return block.getHeight() == MAX_HEIGHT;
+    }
+
+
     /**
      * Retrieves a list of valid neighboring cells the worker can move to.
      * A valid neighbor is an adjacent cell that is not occupied, 
@@ -96,14 +108,10 @@ public class Worker {
      * @return true if the worker can move to the specified cell, false otherwise
      */
     public boolean canMoveToCell(Cell newCell) {
+        if (player.getGodCard() != null) {
+            return player.getGodCard().canMoveToCell(this, newCell);
+        }
         return !newCell.isOccupied() && this.getValidNeighbors().contains(newCell) && !newCell.getBlock().hasDome();
-    }
-
-
-    public boolean checkWin(Worker worker){
-        Cell position = worker.getPosition();
-        Block block = position.getBlock();
-        return block.getHeight() == MAX_HEIGHT;
     }
 
     /**
@@ -124,6 +132,9 @@ public class Worker {
                 System.out.println(this.player.getName() + " wins!");
             }
         }
+        else {
+            System.out.println("Invalid Move: Cannot move to " + newCell);
+        }
     }
 
     /**
@@ -134,6 +145,9 @@ public class Worker {
      * @return true if building in the cell is allowed, false otherwise
      */
     public boolean canBuildToCell(Cell cell) {
+        if (player.getGodCard() != null) {
+            return player.getGodCard().canBuildOnCell(this, cell);
+        }
         return this.getValidNeighbors().contains(cell) && !cell.getBlock().hasDome();
     }
 
@@ -144,12 +158,14 @@ public class Worker {
      * @param cell the cell where the worker intends to build
      */
     public void buildBlock(Cell cell) {
-        if (canBuildToCell(cell)){
-            cell.getBlock().buildBlock();
+        if (canBuildToCell(cell)) {
+            if (player.getGodCard() != null) {
+                player.getGodCard().applyBuildRule(this, cell);
+            } else {
+                cell.getBlock().buildBlock();
+            }
+        } else {
+            System.out.println("Invalid Build: Cannot build on " + cell);
         }
-        else{
-            System.out.println("Invalid Build because" + cell + " is not a valid cell. Rechoose a cell!\n");
-        }
-       
     }
 }

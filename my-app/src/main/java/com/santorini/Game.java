@@ -13,6 +13,8 @@ public class Game {
     private boolean endState;
     private String currentAction; 
 
+    
+
     /**
      * Constructs a new Game instance with two players and initializes the board.
      * Sets player1 as the starting player.
