@@ -1,7 +1,11 @@
 package com.example;
 
 import com.santorini.Board;
+import com.santorini.Demeter;
 import com.santorini.Game;
+import com.santorini.Hephaestus;
+import com.santorini.Minotaur;
+import com.santorini.Pan;
 import com.santorini.Player;
 import com.santorini.Worker;
 
@@ -17,14 +21,67 @@ public class AppTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         player1 = new Player("PlayerA");
-        player2 = new Player("playerB");
+        player2 = new Player("PlayerB");
+        player1.setGodCard(new Demeter());
+        player2.setGodCard(new Hephaestus()); // You can switch this to test different cards.
         game = new Game(player1, player2);
         board = game.getBoard();
         
-        // Place workers for player1
+        // Place workers for both players
         player1.placeWorker(board.getCell(1, 1), board.getCell(1, 2), board);
+        player2.placeWorker(board.getCell(4, 4), board.getCell(4, 3), board);
     }
 
+    //fail test
+    public void testDemeterDoubleBuild() {
+        Worker worker = player1.selectWorker(0);
+        game.moveWorker(worker, board.getCell(2, 2)); // Move to an adjacent position.
+        worker.buildBlock(board.getCell(2, 3)); // First build.
+        assertEquals(1, board.getCell(2, 3).getBlock().getHeight());
+
+        worker.buildBlock(board.getCell(2, 4)); // Second build at a different cell.
+        assertEquals(1, board.getCell(2, 4).getBlock().getHeight());
+    }
+    
+    //stackoverflow
+    public void testHephaestusDoubleBuild() {
+        Worker worker = player2.selectWorker(0);
+        game.moveWorker(worker, board.getCell(3, 3)); // Assume moving to an adjacent position is valid.
+        worker.buildBlock(board.getCell(3, 4)); // First build.
+        worker.buildBlock(board.getCell(3, 4)); // Second build by Hephaestus.
+    
+        assertEquals(2, board.getCell(3, 4).getBlock().getHeight());
+    }
+    
+    //error: stack overflow
+    public void testPanSpecialWinCondition() {
+        player1.setGodCard(new Pan());
+        Worker worker = player1.selectWorker(0);
+        
+        // Simulating a situation where the worker moves down from a higher to a lower level.
+        board.getCell(2, 2).getBlock().buildBlock(); // Level 1
+        board.getCell(2, 2).getBlock().buildBlock(); // Level 2
+        worker.setPosition(board.getCell(2, 2));
+        
+        game.moveWorker(worker, board.getCell(2, 1)); // Assume (2, 1) is at level 0.
+        
+        assertTrue(player1.checkWinStatus()); // Pan wins by moving down two levels.
+    }
+
+    //error: index out of bounds
+    public void testMinotaurPush() {
+        player2.setGodCard(new Minotaur());
+        Worker minotaurWorker = player2.selectWorker(0);
+        Worker opponentWorker = player1.selectWorker(0);
+        
+        game.moveWorker(minotaurWorker, board.getCell(1, 1)); // Moving Minotaur to opponent's worker's cell.
+    
+        assertEquals(board.getCell(1, 0), opponentWorker.getPosition()); // Opponent pushed backward.
+        assertEquals(board.getCell(1, 1), minotaurWorker.getPosition()); // Minotaur moves to the cell.
+    }
+    
+
+    
     public void testSwitchTurn() {
         assertEquals(player1, game.getTurn());
 
@@ -129,4 +186,5 @@ public class AppTest extends TestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
     }
+    
 }

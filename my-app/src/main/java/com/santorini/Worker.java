@@ -28,11 +28,10 @@ public class Worker {
         this.player = player;
     }
     
-    /**
-     * Gets the current position of the worker.
-     *
-     * @return the current Cell object representing the worker's position
-     */
+    public Board getBoard() {
+        return board;
+    }
+    
     public Cell getPosition() {
         return position;
     }
