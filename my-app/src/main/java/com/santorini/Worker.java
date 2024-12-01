@@ -14,6 +14,7 @@ public class Worker {
     private static final int SIDE = 5;
     private static final int MAX_HEIGHT = 3;
     private final Player player;
+    private int previousHeight = 0;
 
      /**
      * Constructs a Worker with an initial position and reference to the game board.
@@ -26,6 +27,7 @@ public class Worker {
         this.position = position;
         this.board = board;
         this.player = player;
+        this.previousHeight = 0;
     }
     
     public Board getBoard() {
@@ -49,6 +51,9 @@ public class Worker {
     }
 
 
+    public int getPreviousHeight(){
+        return previousHeight;
+    }
 
     public boolean checkWin(Worker worker){
         Cell position = worker.getPosition();
@@ -119,8 +124,12 @@ public class Worker {
      * @param newCell the target cell for the worker's move
      */
     public void doWorkerMove(Cell newCell) {
+        previousHeight = this.position.getBlock().getHeight();
         if (canMoveToCell(newCell)){
-            if (position != null) {
+            if (player.getGodCard() != null) {
+                player.getGodCard().applyMoveRule(this, this.getPosition(), newCell);
+            }
+            else if (position != null) {
                 position.setOccupiedWorker(null);  
             }
             newCell.setOccupiedWorker(this);  

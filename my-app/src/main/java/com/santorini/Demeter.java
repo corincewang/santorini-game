@@ -16,7 +16,7 @@ public class Demeter implements GodCard {
         return !targetCell.equals(lastBuiltCell) && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
-    
+
     @Override
     public void applyMoveRule(Worker worker, Cell origin, Cell destination) {
        // Demeter does not affect moving, so no special rules
@@ -24,6 +24,7 @@ public class Demeter implements GodCard {
 
     @Override
     public void applyBuildRule(Worker worker, Cell targetCell) {
+
         if (canBuildOnCell(worker, targetCell)) {
             targetCell.getBlock().buildBlock();
             lastBuiltCell = targetCell;  // Remember last built cell

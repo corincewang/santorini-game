@@ -1,6 +1,7 @@
 package com.example;
 
 import com.santorini.Board;
+import com.santorini.Cell;
 import com.santorini.Demeter;
 import com.santorini.Game;
 import com.santorini.Hephaestus;
@@ -32,18 +33,21 @@ public class AppTest extends TestCase {
         player2.placeWorker(board.getCell(4, 4), board.getCell(4, 3), board);
     }
 
-    //fail test
+
     public void testDemeterDoubleBuild() {
         Worker worker = player1.selectWorker(0);
         game.moveWorker(worker, board.getCell(2, 2)); // Move to an adjacent position.
         worker.buildBlock(board.getCell(2, 3)); // First build.
         assertEquals(1, board.getCell(2, 3).getBlock().getHeight());
 
-        worker.buildBlock(board.getCell(2, 4)); // Second build at a different cell.
-        assertEquals(1, board.getCell(2, 4).getBlock().getHeight());
+        worker.buildBlock(board.getCell(2, 3)); // Second build at a different cell.
+        assertEquals(1, board.getCell(2, 3).getBlock().getHeight());
+
+        worker.buildBlock(board.getCell(3, 3)); // Second build at a different cell.
+        assertEquals(1, board.getCell(3, 3).getBlock().getHeight());
     }
     
-    //stackoverflow
+
     public void testHephaestusDoubleBuild() {
         Worker worker = player2.selectWorker(0);
         game.moveWorker(worker, board.getCell(3, 3)); // Assume moving to an adjacent position is valid.
@@ -53,32 +57,45 @@ public class AppTest extends TestCase {
         assertEquals(2, board.getCell(3, 4).getBlock().getHeight());
     }
     
-    //error: stack overflow
+
     public void testPanSpecialWinCondition() {
         player1.setGodCard(new Pan());
         Worker worker = player1.selectWorker(0);
         
         // Simulating a situation where the worker moves down from a higher to a lower level.
-        board.getCell(2, 2).getBlock().buildBlock(); // Level 1
-        board.getCell(2, 2).getBlock().buildBlock(); // Level 2
-        worker.setPosition(board.getCell(2, 2));
-        
+        board.getCell(1, 1).getBlock().buildBlock(); // Level 1
+        board.getCell(1, 1).getBlock().buildBlock(); // Level 2
+        worker.setPosition(board.getCell(1, 1));
+
         game.moveWorker(worker, board.getCell(2, 1)); // Assume (2, 1) is at level 0.
         
         assertTrue(player1.checkWinStatus()); // Pan wins by moving down two levels.
     }
 
-    //error: index out of bounds
-    public void testMinotaurPush() {
+
+    public void testMinotaurPushWorker() {
         player2.setGodCard(new Minotaur());
-        Worker minotaurWorker = player2.selectWorker(0);
-        Worker opponentWorker = player1.selectWorker(0);
-        
-        game.moveWorker(minotaurWorker, board.getCell(1, 1)); // Moving Minotaur to opponent's worker's cell.
     
-        assertEquals(board.getCell(1, 0), opponentWorker.getPosition()); // Opponent pushed backward.
-        assertEquals(board.getCell(1, 1), minotaurWorker.getPosition()); // Minotaur moves to the cell.
+        // Position Player1's worker at (3, 4), directly in front of Player2's worker at (4, 4)
+        player1.placeWorker(board.getCell(3, 4), board.getCell(3, 3), board);
+        Worker player2Worker = player2.selectWorker(0);
+    
+        // The target cell where the push will happen
+        Cell pushTarget = board.getCell(3, 4);
+        // Expected destination for Player1's worker after being pushed (into the next cell in line)
+        Cell pushedDestination = board.getCell(2, 4);  // Cell directly ahead when pushing from (3, 4) to (2, 4)
+    
+        // Perform the move using Minotaur's special ability
+        game.moveWorker(player2Worker, pushTarget);
+    
+        // Check positions after the move
+        assertEquals("Player2's worker should now be at the pushed cell (3, 4)", pushTarget, player2Worker.getPosition());
+        assertSame("Player2's worker should occupy the push target (3, 4)", player2Worker, pushTarget.getOccupiedWorker());
+        assertNull("Original position of Player2's worker (4, 4) should be empty", board.getCell(4, 4).getOccupiedWorker());
+        assertEquals("Player1's worker should be in the pushed position (2, 4)", player1.getWorkers()[0], pushedDestination.getOccupiedWorker());
+       
     }
+    
     
 
     

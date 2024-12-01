@@ -30,6 +30,13 @@ public class Board {
     public Cell getCell(int x, int y) {
         return cells[x][y];
     }
+
+    // Board.java
+    public boolean isValidPosition(int x, int y) {
+        return x >= 0 && x < SIDE && y >= 0 && y < SIDE;
+    }
+
+
 }
 
 

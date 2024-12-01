@@ -1,38 +1,65 @@
 package com.santorini;
 
+
 public class Minotaur implements GodCard {
+    private static final int MAX_HEIGHT = 3;
+
+    // MinotaurGodCard.java
     @Override
     public boolean canMoveToCell(Worker worker, Cell targetCell) {
-        // Check if the cell is occupied by an opponent worker and if the push is possible
+        // Check if the cell is occupied by an opponent's worker and if the push is possible
         if (targetCell.isOccupied() && targetCell.getOccupiedWorker().getPlayer() != worker.getPlayer()) {
-            Cell pushToCell = worker.getBoard().getCell(targetCell.getX() + (targetCell.getX() - worker.getPosition().getX()), 
-                                             targetCell.getY() + (targetCell.getY() - worker.getPosition().getY()));
-            // Can move if the push to cell is valid (in bounds, not occupied)
-            return pushToCell != null && !pushToCell.isOccupied();
+            int pushX = targetCell.getX() + (targetCell.getX() - worker.getPosition().getX());
+            int pushY = targetCell.getY() + (targetCell.getY() - worker.getPosition().getY());
+     
+            // Check if the push to cell is within bounds and not occupied
+            if (worker.getBoard().isValidPosition(pushX, pushY)) {
+                Cell pushToCell = worker.getBoard().getCell(pushX, pushY);
+                return !pushToCell.isOccupied();
+            }
         }
-        return worker.canMoveToCell(targetCell);
+        return !targetCell.isOccupied() && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
+
     }
+
 
     @Override
     public boolean canBuildOnCell(Worker worker, Cell targetCell) {
         return worker.canBuildToCell(targetCell);
     }
 
+
+    
     @Override
-    public void applyMoveRule(Worker worker, Cell origin, Cell destination) {
-        if (destination.isOccupied() && destination.getOccupiedWorker().getPlayer() != worker.getPlayer()) {
-            Cell pushToCell = worker.getBoard().getCell(destination.getX() + (destination.getX() - origin.getX()), 
-                                                        destination.getY() + (destination.getY() - origin.getY()));
-            // Move opponent worker
-            Worker pushedWorker = destination.getOccupiedWorker();
-            pushToCell.setOccupiedWorker(pushedWorker);
-            pushedWorker.setPosition(pushToCell);
+    public void applyMoveRule(Worker worker, Cell origin, Cell target) {
+        System.out.println("Minotaur applyMove");
+        if (target.isOccupied() && target.getOccupiedWorker().getPlayer() != worker.getPlayer()) {
+            int dx = target.getX() - origin.getX();  // Delta X
+            int dy = target.getY() - origin.getY();  // Delta Y
+            int destinationX = target.getX() + dx;  // Calculate push X coordinate
+            int destinationY = target.getY() + dy;  // Calculate push Y coordinate
+    
+            // Ensure the push to cell is within bounds and not occupied
+            if (worker.getBoard().isValidPosition(destinationX, destinationY)) {
+                Cell destination = worker.getBoard().getCell(destinationX, destinationY);
+                if (!destination.isOccupied()) {
+                    // Move the opponent worker to the new cell
+                    Worker pushedWorker = target.getOccupiedWorker();
+                    pushedWorker.setPosition(destination);  // Update the position of the pushed worker
+                    destination.setOccupiedWorker(pushedWorker);  // Assign the pushed worker to the new cell
+                    target.setOccupiedWorker(null);  // Clear the original cell
+
+                }
+            }
         }
-        // Move the Minotaur's worker
-        worker.setPosition(destination);
-        origin.setOccupiedWorker(null);
-        destination.setOccupiedWorker(worker);
+    
+        // Move the Minotaur worker to the target
+        origin.setOccupiedWorker(null);  // Clear the original cell
+        target.setOccupiedWorker(worker);  // Set the worker to the new cell
+        worker.setPosition(target);  // Update the worker's position
     }
+    
+
 
     @Override
     public void applyBuildRule(Worker worker, Cell targetCell) {
@@ -41,6 +68,6 @@ public class Minotaur implements GodCard {
 
     @Override
     public boolean checkWinCondition(Worker worker) {
-        return worker.checkWin(worker);
+        return worker.getPosition().getBlock().getHeight() == MAX_HEIGHT;
     }
 }

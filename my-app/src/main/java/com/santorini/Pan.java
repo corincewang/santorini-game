@@ -1,9 +1,11 @@
 package com.santorini;
 
 public class Pan implements GodCard {
+    private static final int MAX_HEIGHT = 3;
+
     @Override
     public boolean canMoveToCell(Worker worker, Cell targetCell) {
-        return worker.canMoveToCell(targetCell);
+        return !targetCell.isOccupied() && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
     @Override
@@ -27,9 +29,9 @@ public class Pan implements GodCard {
     @Override
     public boolean checkWinCondition(Worker worker) {
         // Check if moving down two or more levels
-        if (worker.getPosition().getBlock().getHeight() - worker.getPosition().getBlock().getHeight() >= 2) {
+        if (worker.getPreviousHeight() - worker.getPosition().getBlock().getHeight() >= 2) {
             return true;
         }
-        return worker.checkWin(worker);
+        return worker.getPosition().getBlock().getHeight() == MAX_HEIGHT;
     }
 }

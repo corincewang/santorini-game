@@ -2,17 +2,18 @@ package com.santorini;
 
 public class Hephaestus implements GodCard {
     private boolean hasBuiltOnce = false;
+    private static final int MAX_HEIGHT = 3;
 
     @Override
     public boolean canMoveToCell(Worker worker, Cell targetCell) {
         // Hephaestus does not affect moving
-        return worker.canMoveToCell(targetCell);
+        return !targetCell.isOccupied() && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
     @Override
     public boolean canBuildOnCell(Worker worker, Cell targetCell) {
         // Normal building rules apply
-        return worker.canBuildToCell(targetCell);
+        return worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
     @Override
@@ -34,6 +35,6 @@ public class Hephaestus implements GodCard {
     @Override
     public boolean checkWinCondition(Worker worker) {
         // Normal win condition
-        return worker.checkWin(worker);
+        return worker.getPosition().getBlock().getHeight() == MAX_HEIGHT;
     }
 }
