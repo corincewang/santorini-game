@@ -158,17 +158,20 @@ public class AppTest extends TestCase {
     }
     
     public void testPlayer2BuildBlock() {
+        player2.setGodCard(null);
         // Setup workers for player2
         player2.placeWorker(board.getCell(3, 1), board.getCell(4, 1), board);
         Worker worker3 = player2.selectWorker(0);
         game.moveWorker(worker3, board.getCell(3, 2)); // Move to (3, 2)
     
         // Build block
-        worker3.buildBlock(board.getCell(3, 3));
-        assertEquals(1, board.getCell(3, 3).getBlock().getHeight());
+        worker3.buildBlock(board.getCell(2, 1));
+        assertEquals(1, board.getCell(2, 1).getBlock().getHeight());
     }
     
     public void testWinCondition() {
+        player1.setGodCard(null);
+        player2.setGodCard(null);
         int x1 = 1, y1 = 2, x2 = 1, y2 = 3; 
         player1.placeWorker(board.getCell(x1, y1), board.getCell(x2, y2), board);
         Worker worker1 = player1.selectWorker(0);
