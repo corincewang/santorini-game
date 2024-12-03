@@ -184,21 +184,29 @@ class App extends React.Component<Props, GameState> {
   };
 
   selectGodCard = async (player, godCard) => {
-    const response = await fetch('/select-god-card', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ player, godCard }),
-    });
+    try {
+        console.log(`Attempting to select God Card: ${godCard} for Player: ${player}`);
+        
+        const response = await fetch(`/play?action=selectGodCard&player=${player}&godCard=${godCard}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    const json = await response.json();
-    if (!response.ok) {
-        alert(json.error);
-    } else {
-        const godCards = { ...this.state.godCards, [player]: godCard };
-        this.setState({ godCards });
-        console.log('God card selection updated successfully:', json);
+        const json = await response.json();
+        console.log('Parsed JSON response:', json);
+
+        if (!response.ok) {
+            console.error('Error selecting God Card:', json.error);
+            alert(json.error);
+        } else {
+            const godCards = { ...this.state.godCards, [player]: godCard };
+            this.setState({ godCards });
+            console.log('God card selection updated successfully:', json);
+        }
+    } catch (error) {
+        console.error('Failed to select God Card:', error);
     }
 };
 
