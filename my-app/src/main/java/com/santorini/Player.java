@@ -12,7 +12,6 @@ public class Player {
     private boolean loseStatus;
     private static final int MAX_HEIGHT = 3;
     private GodCard godCard; 
-    private boolean hasPlacedWorkers = false; 
 
 
      /**
@@ -71,7 +70,6 @@ public class Player {
     }
 
 
-
     /**
      * Returns an array of the player's workers.
      *
@@ -108,12 +106,5 @@ public class Player {
         return this.godCard;
     }
 
-    public void setHasPlacedWorkers(boolean hasPlaced) {
-        this.hasPlacedWorkers = hasPlaced;
-    }
 
-    public boolean getHasPlacedWorkers() {
-        return hasPlacedWorkers;
-    }
-    
 }

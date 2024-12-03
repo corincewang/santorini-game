@@ -37,42 +37,79 @@ class App extends React.Component<Props, GameState> {
     }
   };
 
+
   placeWorker = async (x: number, y: number): Promise<void> => {
     try {
-      const response = await fetch(`/play?action=place&x=${x}&y=${y}`);
-      const json = await response.json();
-  
-      if (json.error) {
-        alert(json.error);
-      } else {
-        const updatedCells = json.gameState?.cells || [];
-  
-        const mergedCells = this.state.cells.map((cell) => {
-          const updatedCell = updatedCells.find(
-            (updated) => updated.x === cell.x && updated.y === cell.y
-          );
-          return updatedCell || cell;
-        });
-  
-        this.setState({
-          cells: mergedCells,
-          currentPlayer: json.gameState?.currentPlayer || 'Player 1',
-        });
-  
-        if (json.gameState?.action === 'chooseWorker') {
-          this.setState({ action: 'chooseWorker' }); 
+        const response = await fetch(`/play?action=place&x=${x}&y=${y}`);
+        const json = await response.json();
+
+        if (json.error) {
+            alert(json.error);
+        } else {
+            this.updateGameStateFromResponse(json);
         }
-      }
     } catch (error) {
-      console.error('Failed to place worker:', error);
+        console.error('Failed to place worker:', error);
     }
   };
+
+  updateGameStateFromResponse = (json) => {
+    const updatedCells = json.gameState?.cells || [];
+
+    const mergedCells = this.state.cells.map((cell) => {
+        const updatedCell = updatedCells.find(
+            (updated) => updated.x === cell.x && updated.y === cell.y
+        );
+        return updatedCell || cell;
+    });
+
+    this.setState({
+        cells: mergedCells,
+        currentPlayer: json.gameState?.currentPlayer,
+    }, () => {
+        console.log("Updated state after placing workers:", this.state);
+    });
+
+    // Check if it's time to choose a worker, which typically follows placing
+    if (json.gameState?.action === 'chooseWorker') {
+        console.log(`Action is 'chooseWorker', disabling god card selection for ${json.gameState?.currentPlayer}`);
+        this.setState({ action: 'chooseWorker' });
+        // As soon as a player places a worker, disable god card selection for them
+
+
+     
+    }
+};
+
   
+
+  disableGodCardSelection = (currentPlayer) => {
+    console.log(`Attempting to disable God Card selection for ${currentPlayer}`);
+    if (this.state.godCards[currentPlayer]) {
+      return;
+    }
+
+    // Update the state to reflect that the current player can no longer select a god card
+    this.setState(prevState => {
+        console.log(`Disabling selection for ${currentPlayer}`);
+        return {
+            godCards: {
+                ...prevState.godCards,
+                [currentPlayer]: 'Selection disabled'
+            }
+        };
+    }, () => {
+        console.log(`Updated godCards state: `, this.state.godCards);
+    });
+};
+
+
   chooseWorker = async (x, y) => {
     try {
       const response = await fetch(`/play?action=chooseWorker&x=${x}&y=${y}`);
       const json = await response.json();
       this.setState({ ...json, action: 'move' }); 
+         this.disableGodCardSelection(json.gameState.currentPlayer);
     } catch (error) {
         console.error("Error chooseing worker:", error);
     }
@@ -174,18 +211,27 @@ class App extends React.Component<Props, GameState> {
 
 
   renderGodCardSelection = () => {
-    const godCards = ["Demeter", "Hephaestus", "Minotaur", "Pan"];
+    const { currentPlayer, godCards } = this.state;
+    const godCardOptions = ["Demeter", "Hephaestus", "Minotaur", "Pan"];
+
+    // Check if the god card selection is disabled for the current player
+    // or if the current player has already selected a god card.
+    if (godCards[currentPlayer] === 'Selection disabled' || godCards[currentPlayer]) {
+        return null; // Do not render the selection if disabled or already selected
+    }
+
     return (
         <div className="god-card-selection">
-            <h4>Choose a God Card for {this.state.currentPlayer}</h4>
-            {godCards.map(card => (
-                <button key={card} onClick={() => this.selectGodCard(this.state.currentPlayer, card)} className="god-card-btn">
+            <h4>Choose a God Card for {currentPlayer}</h4>
+            {godCardOptions.map(card => (
+                <button key={card} onClick={() => this.selectGodCard(currentPlayer, card)} className="god-card-btn">
                     {card}
                 </button>
             ))}
         </div>
     );
   };
+
 
   renderGodCardStatus = () => {
     const { godCards } = this.state;

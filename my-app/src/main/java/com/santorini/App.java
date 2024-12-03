@@ -131,14 +131,7 @@ public class App extends NanoHTTPD {
                 }
                 """;
         }
-        // Check if the player has already placed workers
-        if (this.playerWorkerCount.get(player) > 0) {
-            return """
-                {
-                    "error": "God card cannot be selected after starting to place workers."
-                }
-                """;
-        }
+
 
         // Apply god card to player
         try {
@@ -155,12 +148,12 @@ public class App extends NanoHTTPD {
         // Update the godCards map in the game state
         this.game.setGodCards(playerName, godCardName);
 
-    return String.format("""
-        {
-            "message": "God card '%s' selected successfully for player '%s'.",
-            "gameState": %s
-        }
-        """, godCardName, playerName, GameState.forGame(this.game).toString());
+        return String.format("""
+            {
+                "message": "God card '%s' selected successfully for player '%s'.",
+                "gameState": %s
+            }
+            """, godCardName, playerName, GameState.forGame(this.game).toString());
     }
 
     
@@ -169,37 +162,38 @@ public class App extends NanoHTTPD {
     private String handlePlaceAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         int placedWorkers = playerWorkerCount.getOrDefault(currentPlayer, 0);
-
+    
         if (placedWorkers < 2) {
-            currentPlayer.setHasPlacedWorkers(true);  // Mark that the player has started placing workers
             this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
             placedWorkers++;
             playerWorkerCount.put(currentPlayer, placedWorkers);
 
-            if (placedWorkers == 2 && currentPlayer.equals(this.game.getPlayers()[0])) {
+    
+            if (placedWorkers == 2) {
                 this.game.switchTurn();
-                return """
-                    {
-                        "message": "Player 1 has placed all workers. Now it's Player 2's turn.",
-                        "gameState": %s
-                    }
-                    """.formatted(GameState.forGame(this.game).toString());
-            } else if (placedWorkers == 2 && currentPlayer.equals(this.game.getPlayers()[1])) {
-                this.game.switchTurn();
-                this.game.setCurrentAction("chooseWorker");
-                return """
-                    {
-                        "message": "All workers placed by both players. Moving to 'chooseWorker' phase.",
-                        "gameState": %s
-                    }
-                    """.formatted(GameState.forGame(this.game).toString());
+                if (currentPlayer.equals(this.game.getPlayers()[0])) {
+                    return String.format("""
+                        {
+                            "message": "Player 1 has placed all workers. Now it's Player 2's turn.",
+                            "gameState": %s
+                        }
+                        """, GameState.forGame(this.game).toString());
+                } else {
+                    this.game.setCurrentAction("chooseWorker");
+                    return String.format("""
+                        {
+                            "message": "All workers placed by both players. Moving to 'chooseWorker' phase.",
+                            "gameState": %s
+                        }
+                        """, GameState.forGame(this.game).toString());
+                }
             } else {
-                return """
+                return String.format("""
                     {
                         "message": "Worker placed at (%d, %d) by %s.",
                         "gameState": %s
                     }
-                    """.formatted(x, y, currentPlayer, GameState.forGame(this.game).toString());
+                    """, x, y, currentPlayer.getName(), GameState.forGame(this.game).toString());
             }
         } else {
             return """
@@ -209,6 +203,7 @@ public class App extends NanoHTTPD {
                 """;
         }
     }
+    
 
     private String handleChooseWorkerAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
