@@ -29,6 +29,10 @@ public class Minotaur implements GodCard {
     }
 
 
+    @Override
+    public boolean allowsExtraBuild() {
+        return false;
+    }
     
     @Override
     public void applyMoveRule(Worker worker, Cell origin, Cell target) {

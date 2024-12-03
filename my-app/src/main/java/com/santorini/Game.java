@@ -16,7 +16,7 @@ public class Game {
     private boolean endState;
     private String currentAction; 
     private Map<String, String> godCards;
-
+    private boolean awaitingExtraBuild = false;
 
 
     /**
@@ -63,6 +63,14 @@ public class Game {
 
     public void setCurrentAction(String action) {
         this.currentAction = action;
+    }
+
+    public boolean isAwaitingExtraBuild() {
+        return awaitingExtraBuild;
+    }
+    
+    public void setAwaitingExtraBuild(boolean awaiting) {
+        this.awaitingExtraBuild = awaiting;
     }
 
     /**

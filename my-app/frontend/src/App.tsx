@@ -72,11 +72,7 @@ class App extends React.Component<Props, GameState> {
 
     // Check if it's time to choose a worker, which typically follows placing
     if (json.gameState?.action === 'chooseWorker') {
-        console.log(`Action is 'chooseWorker', disabling god card selection for ${json.gameState?.currentPlayer}`);
         this.setState({ action: 'chooseWorker' });
-        // As soon as a player places a worker, disable god card selection for them
-
-
      
     }
 };
@@ -84,14 +80,12 @@ class App extends React.Component<Props, GameState> {
   
 
   disableGodCardSelection = (currentPlayer) => {
-    console.log(`Attempting to disable God Card selection for ${currentPlayer}`);
     if (this.state.godCards[currentPlayer]) {
       return;
     }
 
     // Update the state to reflect that the current player can no longer select a god card
     this.setState(prevState => {
-        console.log(`Disabling selection for ${currentPlayer}`);
         return {
             godCards: {
                 ...prevState.godCards,
@@ -109,7 +103,7 @@ class App extends React.Component<Props, GameState> {
       const response = await fetch(`/play?action=chooseWorker&x=${x}&y=${y}`);
       const json = await response.json();
       this.setState({ ...json, action: 'move' }); 
-         this.disableGodCardSelection(json.gameState.currentPlayer);
+      this.disableGodCardSelection(json.gameState.currentPlayer);
     } catch (error) {
         console.error("Error chooseing worker:", error);
     }

@@ -12,6 +12,11 @@ public class Pan implements GodCard {
     public boolean canBuildOnCell(Worker worker, Cell targetCell) {
         return worker.canBuildToCell(targetCell);
     }
+    
+    @Override
+    public boolean allowsExtraBuild() {
+        return false;
+    }
 
     @Override
     public void applyMoveRule(Worker worker, Cell origin, Cell destination) {

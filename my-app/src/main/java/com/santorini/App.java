@@ -271,10 +271,11 @@ public class App extends NanoHTTPD {
         }
     }
 
+
     private String handleBuildAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         Worker selectedWorker = selectedWorkers.get(currentPlayer);
-
+    
         if (selectedWorker == null) {
             return """
                 {
@@ -287,9 +288,23 @@ public class App extends NanoHTTPD {
     
         if (selectedWorker.canBuildToCell(targetCell)) {
             selectedWorker.buildBlock(targetCell);
-            selectedWorkers.remove(currentPlayer);  // 清除当前选中的工人
-            this.game.switchTurn();  // 切换到下一个玩家
-            this.game.setCurrentAction("chooseWorker");  // 设置下一个动作为选择工人
+    
+            // Check if the player's GodCard allows an extra build
+            GodCard godCard = currentPlayer.getGodCard();
+            if (godCard != null && godCard.allowsExtraBuild()) {
+                this.game.setAwaitingExtraBuild(true); // Set flag for extra build
+                return String.format("""
+                    {
+                        "message": "First build complete. You may perform an extra build.",
+                        "gameState": %s
+                    }
+                    """, GameState.forGame(this.game).toString());
+            }
+    
+            // If no extra build is allowed, proceed to switch turns
+            selectedWorkers.remove(currentPlayer);  // Clear the current worker
+            this.game.switchTurn();  // Switch to the next player
+            this.game.setCurrentAction("chooseWorker");  // Set the next action
     
             return String.format("""
                 {
@@ -305,5 +320,26 @@ public class App extends NanoHTTPD {
                 """;
         }
     }
+    
+
+    private String handlePassAction() {
+        if (this.game.isAwaitingExtraBuild()) {
+            this.game.setAwaitingExtraBuild(false);
+            this.game.switchTurn(); // Move to the next player's turn
+            return """
+                {
+                    "message": "Extra build skipped. Turn switched to the next player.",
+                    "gameState": %s
+                }
+                """.formatted(GameState.forGame(this.game).toString());
+        } else {
+            return """
+                {
+                    "error": "No extra build to skip."
+                }
+                """;
+        }
+    }
+    
     
 }

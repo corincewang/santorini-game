@@ -16,6 +16,11 @@ public class Demeter implements GodCard {
         return !targetCell.equals(lastBuiltCell) && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
+    @Override
+    public boolean allowsExtraBuild(){
+        return true;
+    }
+
 
     @Override
     public void applyMoveRule(Worker worker, Cell origin, Cell destination) {

@@ -15,6 +15,11 @@ public class Hephaestus implements GodCard {
         // Normal building rules apply
         return worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
+    
+    @Override
+    public boolean allowsExtraBuild() {
+        return true;
+    }
 
     @Override
     public void applyMoveRule(Worker worker, Cell origin, Cell destination) {
