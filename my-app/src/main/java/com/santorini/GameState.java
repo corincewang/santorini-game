@@ -1,6 +1,7 @@
 package com.santorini;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public final class GameState {
     private final CellState[] cells;
@@ -8,14 +9,16 @@ public final class GameState {
     private final String action;
     private final boolean endState;  // Indicates if the game has ended
     private final String winner;     // Name of the winner if the game has ended
+    private final Map<String, String> godCards;
     private static final int SIDE = 5;
 
-    private GameState(CellState[] cells, String currentPlayer, String action, boolean endState, String winner) {
+    private GameState(CellState[] cells, String currentPlayer, String action, boolean endState, String winner, Map<String, String> godCards) {
         this.cells = cells;
         this.currentPlayer = currentPlayer;
         this.action = action;
         this.endState = endState;
         this.winner = winner;
+        this.godCards = godCards;
     }
 
     /**
@@ -30,7 +33,8 @@ public final class GameState {
         String action = game.getCurrentAction();
         boolean endState = game.getEndState();
         String winner = game.getWinner() != null ? game.getWinner().getName() : null;
-        return new GameState(cellStates, currentPlayer, action, endState, winner);
+        Map<String, String> godCards = game.getGodCards();  
+        return new GameState(cellStates, currentPlayer, action, endState, winner, godCards);
     }
 
     public CellState[] getCells() {
@@ -47,6 +51,10 @@ public final class GameState {
 
     public String getWinner() {
         return this.winner;
+    }
+
+    public Map<String, String> getGodCards() {
+        return godCards;
     }
 
     /**

@@ -15,6 +15,6 @@ export interface Cell {
     winner: string | null;
     action: string;
     showWinner: boolean;
-    
+    godCards: {} 
   }
   

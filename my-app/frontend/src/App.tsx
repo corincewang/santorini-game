@@ -18,6 +18,7 @@ class App extends React.Component<Props, GameState> {
       winner: null,
       action: 'place', 
       showWinner: false,
+      godCards: {},
     };
   }
 
@@ -141,7 +142,7 @@ class App extends React.Component<Props, GameState> {
         this.setState({
           cells: mergedCells,
           currentPlayer: currentPlayer,
-          action: nextAction  // 设置为后端指定的下一个动作
+          action: nextAction  
         });
 
 
@@ -150,12 +151,62 @@ class App extends React.Component<Props, GameState> {
       console.error('Failed to build block:', error);
     }
   };
-  
-  
+
+  selectGodCard = async (player, godCard) => {
+    const response = await fetch('/select-god-card', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ player, godCard }),
+    });
+
+    const json = await response.json();
+    if (!response.ok) {
+        alert(json.error);
+    } else {
+        const godCards = { ...this.state.godCards, [player]: godCard };
+        this.setState({ godCards });
+        console.log('God card selection updated successfully:', json);
+    }
+};
+
+
+
+  renderGodCardSelection = () => {
+    const godCards = ["Demeter", "Hephaestus", "Minotaur", "Pan"];
+    return (
+        <div className="god-card-selection">
+            <h4>Choose a God Card for {this.state.currentPlayer}</h4>
+            {godCards.map(card => (
+                <button key={card} onClick={() => this.selectGodCard(this.state.currentPlayer, card)} className="god-card-btn">
+                    {card}
+                </button>
+            ))}
+        </div>
+    );
+  };
+
+  renderGodCardStatus = () => {
+    const { godCards } = this.state;
+    const players = ["Player1", "Player2"];
+
+    return (
+        <div className="god-card-status">
+            <h4>God Card Selections:</h4>
+            {players.map(player => (
+                <div key={player}>
+                    {player}: {godCards[player] || "None"}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+
 
   handleCellClick = (cell: Cell) => {
     const { action, currentPlayer } = this.state;
-
   
     if (action === 'chooseWorker' && cell.player === currentPlayer) {
       this.chooseWorker(cell.x, cell.y);
@@ -259,24 +310,30 @@ closeModal = () => {
   }
 
   render(): React.ReactNode {
-    const { cells, winner, showWinner, currentPlayer } = this.state;
+    const { cells, winner, showWinner, currentPlayer, godCards } = this.state;
     return (
-        <div>
-            <h1>Santorini Game</h1>
-            {showWinner ? (
-                <h2>{currentPlayer} Wins</h2>
-            ) : (
-                <h2>Current Turn: {currentPlayer}</h2>
-            )}
-            <div id="board">
-                {cells.map((cell, i) => this.createCell(cell, i))}
+        <div className="app-container">  {/* Container using flex layout */}
+            <div>  {/* Main content area */}
+                <h1>Santorini Game</h1>
+                {showWinner ? (
+                    <h2>{currentPlayer} Wins</h2>
+                ) : (
+                    <h2>Current Turn: {currentPlayer}</h2>
+                )}
+                {!godCards[currentPlayer] && this.renderGodCardSelection()}
+                <div id="board">
+                    {cells.map((cell, i) => this.createCell(cell, i))}
+                </div>
+                <div id="bottombar">
+                    <button onClick={this.newGame}>New Game</button>
+                </div>
             </div>
-            <div id="bottombar">
-                <button onClick={this.newGame}>New Game</button>
-            </div>
+            {this.renderGodCardStatus()}  {/* Right-side God card status area */}
         </div>
     );
 }
+
+
 
   
 }

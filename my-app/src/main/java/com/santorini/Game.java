@@ -1,5 +1,8 @@
 package com.santorini;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Game class manages the overall game state for a Santorini match, 
  * including the board, players, and the current player's turn.
@@ -12,8 +15,9 @@ public class Game {
     private Player turn;
     private boolean endState;
     private String currentAction; 
+    private Map<String, String> godCards;
 
-    
+
 
     /**
      * Constructs a new Game instance with two players and initializes the board.
@@ -28,6 +32,7 @@ public class Game {
         this.turn = player1; 
         this.endState = false; 
         this.currentAction = "place";
+        this.godCards = new HashMap<>();
     }
 
     public Player[] getPlayers(){
@@ -89,6 +94,36 @@ public class Game {
     public boolean getEndState(){
         return endState;
     }
+
+    public Map<String, String> getGodCards() {
+        Map<String, String> godCards = new HashMap<>();
+        for (Player player : players) {
+            String godCardName = player.getGodCard() != null ? player.getGodCard().getClass().getSimpleName() : "No god card";
+            godCards.put(player.getName(), godCardName);
+        }
+        return godCards;
+    }
+
+
+    public void setGodCards(String playerName, String godCardName) {
+        if (playerName == null || godCardName == null) {
+            System.out.println("Player name or God Card name cannot be null.");
+            return;
+        }
+    
+        // Validate that the player exists in the game
+        for (Player player : players) {
+            if (player.getName().equalsIgnoreCase(playerName)) {
+                godCards.put(playerName, godCardName);
+                System.out.println("God card " + godCardName + " set for player " + playerName);
+                return;
+            }
+        }
+    
+        System.out.println("Player not found: " + playerName);
+    }
+    
+
     /**
      * Switches the current turn to the next player.
      */

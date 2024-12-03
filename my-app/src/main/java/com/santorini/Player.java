@@ -12,6 +12,7 @@ public class Player {
     private boolean loseStatus;
     private static final int MAX_HEIGHT = 3;
     private GodCard godCard; 
+    private boolean hasPlacedWorkers = false; 
 
 
      /**
@@ -24,7 +25,7 @@ public class Player {
         this.winStatus = false;
         this.loseStatus = false;
         this.name = name;
-        this.godCard = godCard;
+        this.godCard = null;
     }
 
 
@@ -105,6 +106,14 @@ public class Player {
     
     public GodCard getGodCard() {
         return this.godCard;
+    }
+
+    public void setHasPlacedWorkers(boolean hasPlaced) {
+        this.hasPlacedWorkers = hasPlaced;
+    }
+
+    public boolean getHasPlacedWorkers() {
+        return hasPlacedWorkers;
     }
     
 }

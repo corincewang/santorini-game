@@ -1,6 +1,7 @@
 package com.santorini;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,6 +73,7 @@ public class App extends NanoHTTPD {
             """.formatted(gameState.toString());
     }
 
+
     private String handlePlayAction(Map<String, String> params) {
         if (!params.containsKey("action")) {
             return """
@@ -94,6 +96,8 @@ public class App extends NanoHTTPD {
                 return handleMoveAction(x, y);
             case "build":
                 return handleBuildAction(x, y);
+            case "selectGodCard":
+                return handleSelectGodCard(params); // Note: x and y are not used in god card selection
             default:
                 return String.format("""
                     {
@@ -104,11 +108,70 @@ public class App extends NanoHTTPD {
     }
     
 
+    private String handleSelectGodCard(Map<String, String> params) {
+        if (!params.containsKey("player") || !params.containsKey("godCard")) {
+            return """
+                {
+                    "error": "Missing parameters. Both 'player' and 'godCard' are required."
+                }
+                """;
+        }
+
+        String playerName = params.get("player");
+        String godCardName = params.get("godCard");
+        Player player = Arrays.stream(game.getPlayers())
+                            .filter(p -> p.getName().equalsIgnoreCase(playerName))
+                            .findFirst()
+                            .orElse(null);
+
+        if (player == null) {
+            return """
+                {
+                    "error": "Player not found."
+                }
+                """;
+        }
+        // Check if the player has already placed workers
+        if (this.playerWorkerCount.get(player) > 0) {
+            return """
+                {
+                    "error": "God card cannot be selected after starting to place workers."
+                }
+                """;
+        }
+
+        // Apply god card to player
+        try {
+            GodCard godCard = GodCardFactory.getGodCard(godCardName);
+            player.setGodCard(godCard);
+        } catch (IllegalArgumentException e) {
+            return String.format("""
+                {
+                    "error": "Invalid god card selection: '%s'"
+                }
+                """, godCardName);
+        }
+
+        // Update the godCards map in the game state
+        this.game.setGodCards(playerName, godCardName);
+
+    return String.format("""
+        {
+            "message": "God card '%s' selected successfully for player '%s'.",
+            "gameState": %s
+        }
+        """, godCardName, playerName, GameState.forGame(this.game).toString());
+    }
+
+    
+
+
     private String handlePlaceAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         int placedWorkers = playerWorkerCount.getOrDefault(currentPlayer, 0);
 
         if (placedWorkers < 2) {
+            currentPlayer.setHasPlacedWorkers(true);  // Mark that the player has started placing workers
             this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
             placedWorkers++;
             playerWorkerCount.put(currentPlayer, placedWorkers);
