@@ -10,7 +10,8 @@ public class Pan implements GodCard {
 
     @Override
     public boolean canBuildOnCell(Worker worker, Cell targetCell) {
-        return worker.canBuildToCell(targetCell);
+        System.out.print("Pan can build on cell: ");
+        return worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
     
     @Override

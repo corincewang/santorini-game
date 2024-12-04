@@ -115,9 +115,7 @@ class App extends React.Component<Props, GameState> {
       const response = await fetch(`/play?action=move&x=${x}&y=${y}`);
       const json = await response.json();
 
-      console.log(response)
       console.log('Move Worker Response:', json);
-      console.log(json.gameState.endState);
       // Handle game end state
       if (json.gameState.endState) {
         this.setState({
@@ -209,7 +207,7 @@ class App extends React.Component<Props, GameState> {
         console.error('Failed to select God Card:', error);
     }
 };
-
+mnn 
 
 
   renderGodCardSelection = () => {

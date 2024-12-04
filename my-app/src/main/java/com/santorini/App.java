@@ -275,6 +275,7 @@ public class App extends NanoHTTPD {
     private String handleBuildAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         Worker selectedWorker = selectedWorkers.get(currentPlayer);
+        System.out.print("try to build");
     
         if (selectedWorker == null) {
             return """
@@ -291,6 +292,7 @@ public class App extends NanoHTTPD {
     
             // Check if the player's GodCard allows an extra build
             GodCard godCard = currentPlayer.getGodCard();
+            System.out.println("godCard: " + godCard);
             if (godCard != null && godCard.allowsExtraBuild()) {
                 this.game.setAwaitingExtraBuild(true); // Set flag for extra build
                 return String.format("""
