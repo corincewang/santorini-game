@@ -143,7 +143,7 @@ class App extends React.Component<Props, GameState> {
                 // Game ends immediately after a win condition
                 this.setState({
                     cells: mergedCells,
-                    winner: json.gameState.winner, // Set the winner from the server response
+                    winner: json.gameState.currentPlayer, // Set the winner from the server response
                     showWinner: true,
                     action: '', // Clear action to stop further interactions
                 });
@@ -184,7 +184,6 @@ class App extends React.Component<Props, GameState> {
 
             // Check if an extra build is allowed
             if (json.message?.includes("You may perform an extra build")) {
-                console.log("Extra build opportunity available");
                 this.setState({
                     cells: mergedCells,
                     currentPlayer: currentPlayer,
@@ -192,7 +191,6 @@ class App extends React.Component<Props, GameState> {
                     awaitingExtraBuild: true, // Flag for UI changes
                 });
             } else {
-                console.log("Build complete and turn management updated");
                 this.setState({
                     cells: mergedCells,
                     currentPlayer: currentPlayer,
@@ -442,7 +440,7 @@ closeModal = () => {
         // Render only the winner modal and new game button after the game ends
         return (
             <div className="app-container" style={{ textAlign: 'center', marginTop: '50px' }}>
-                <h1>{currentPlayer} Wins!</h1>
+                <h1>{winner} Wins!</h1>
                 <button
                     style={{
                         padding: '10px 20px',

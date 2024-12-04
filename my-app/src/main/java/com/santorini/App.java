@@ -243,10 +243,10 @@ public class App extends NanoHTTPD {
                     System.out.println("game ends, endState set!");
                     return """
                         {
-                            "message": Game Ends",
+                            "message": "Worker moved to (%d, %d).",
                             "gameState": %s
                         }
-                        """.formatted(GameState.forGame(this.game).toString());
+                        """.formatted(x, y, GameState.forGame(this.game).toString());
                 } else {
        
                     return """
