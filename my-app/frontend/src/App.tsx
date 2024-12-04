@@ -89,7 +89,7 @@ class App extends React.Component<Props, GameState> {
         return {
             godCards: {
                 ...prevState.godCards,
-                [currentPlayer]: 'Selection disabled'
+                [currentPlayer]: 'No God Card'
             }
         };
     }, () => {
@@ -216,7 +216,7 @@ mnn
 
     // Check if the god card selection is disabled for the current player
     // or if the current player has already selected a god card.
-    if (godCards[currentPlayer] === 'Selection disabled' || godCards[currentPlayer]) {
+    if (godCards[currentPlayer] === 'No God Card' || godCards[currentPlayer]) {
         return null; // Do not render the selection if disabled or already selected
     }
 
@@ -242,7 +242,7 @@ mnn
             <h4>God Card Selections:</h4>
             {players.map(player => (
                 <div key={player}>
-                    {player}: {godCards[player] || "None"}
+                    {player}: {godCards[player] || "Not Selected Yet"} 
                 </div>
             ))}
         </div>

@@ -25,7 +25,7 @@ public class Minotaur implements GodCard {
 
     @Override
     public boolean canBuildOnCell(Worker worker, Cell targetCell) {
-        return worker.canBuildToCell(targetCell);
+        return worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
 

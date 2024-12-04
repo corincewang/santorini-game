@@ -292,7 +292,6 @@ public class App extends NanoHTTPD {
     
             // Check if the player's GodCard allows an extra build
             GodCard godCard = currentPlayer.getGodCard();
-            System.out.println("godCard: " + godCard);
             if (godCard != null && godCard.allowsExtraBuild()) {
                 this.game.setAwaitingExtraBuild(true); // Set flag for extra build
                 return String.format("""
