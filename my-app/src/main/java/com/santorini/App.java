@@ -97,7 +97,9 @@ public class App extends NanoHTTPD {
             case "build":
                 return handleBuildAction(x, y);
             case "selectGodCard":
-                return handleSelectGodCard(params); // Note: x and y are not used in god card selection
+                return handleSelectGodCard(params); 
+            case "pass":
+                return handlePassAction();
             default:
                 return String.format("""
                     {
@@ -275,8 +277,6 @@ public class App extends NanoHTTPD {
     private String handleBuildAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         Worker selectedWorker = selectedWorkers.get(currentPlayer);
-        System.out.print("try to build");
-    
         if (selectedWorker == null) {
             return """
                 {
@@ -292,7 +292,7 @@ public class App extends NanoHTTPD {
     
             // Check if the player's GodCard allows an extra build
             GodCard godCard = currentPlayer.getGodCard();
-            if (godCard != null && godCard.allowsExtraBuild()) {
+            if (godCard != null && godCard.allowsExtraBuild() && !this.game.isAwaitingExtraBuild()) {
                 this.game.setAwaitingExtraBuild(true); // Set flag for extra build
                 return String.format("""
                     {
@@ -302,11 +302,19 @@ public class App extends NanoHTTPD {
                     """, GameState.forGame(this.game).toString());
             }
     
-            // If no extra build is allowed, proceed to switch turns
+            if (this.game.isAwaitingExtraBuild()) {
+                this.game.setAwaitingExtraBuild(false); // Reset extra build flag
+                if (godCard != null) {
+                    godCard.resetAll();
+                }
+            }
             selectedWorkers.remove(currentPlayer);  // Clear the current worker
-            this.game.switchTurn();  // Switch to the next player
-            this.game.setCurrentAction("chooseWorker");  // Set the next action
-    
+            this.game.switchTurn();
+            this.game.setCurrentAction("chooseWorker");
+            
+        
+        
+
             return String.format("""
                 {
                     "message": "Worker built on cell (%d, %d). Switch Turn to next player!",
@@ -324,22 +332,26 @@ public class App extends NanoHTTPD {
     
 
     private String handlePassAction() {
-        if (this.game.isAwaitingExtraBuild()) {
-            this.game.setAwaitingExtraBuild(false);
-            this.game.switchTurn(); // Move to the next player's turn
-            return """
-                {
-                    "message": "Extra build skipped. Turn switched to the next player.",
-                    "gameState": %s
-                }
-                """.formatted(GameState.forGame(this.game).toString());
-        } else {
+        // Ensure there is an awaiting extra build
+        if (!this.game.isAwaitingExtraBuild()) {
             return """
                 {
                     "error": "No extra build to skip."
                 }
                 """;
         }
+    
+        // End the extra build phase and switch turn
+        this.game.setAwaitingExtraBuild(false); // Reset the flag
+        this.game.switchTurn(); // Move to the next player's turn
+        this.game.setCurrentAction("chooseWorker"); // Update action to choosing worker for next player
+    
+        return String.format("""
+            {
+                "message": "Extra build skipped. Turn switched to the next player.",
+                "gameState": %s
+            }
+            """, GameState.forGame(this.game).toString());
     }
     
     

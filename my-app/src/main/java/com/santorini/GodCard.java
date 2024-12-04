@@ -8,5 +8,6 @@ public interface GodCard {
 
     void applyBuildRule(Worker worker, Cell targetCell);
     void applyMoveRule(Worker worker, Cell origin, Cell target);
+    void resetAll();
    
 }

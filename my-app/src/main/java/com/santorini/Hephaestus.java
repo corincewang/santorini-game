@@ -3,6 +3,7 @@ package com.santorini;
 public class Hephaestus implements GodCard {
     private boolean hasBuiltOnce = false;
     private static final int MAX_HEIGHT = 3;
+    private Cell lastBuiltCell = null;
 
     @Override
     public boolean canMoveToCell(Worker worker, Cell targetCell) {
@@ -12,6 +13,9 @@ public class Hephaestus implements GodCard {
 
     @Override
     public boolean canBuildOnCell(Worker worker, Cell targetCell) {
+        if (hasBuiltOnce){
+            return targetCell.equals(lastBuiltCell) && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
+        }
         // Normal building rules apply
         return worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
@@ -23,23 +27,29 @@ public class Hephaestus implements GodCard {
 
     @Override
     public void applyMoveRule(Worker worker, Cell origin, Cell destination) {
-        // No specific move rules for Hephaestus
+        worker.setPosition(destination);
+        origin.setOccupiedWorker(null);
+        destination.setOccupiedWorker(worker);
     }
 
     @Override
     public void applyBuildRule(Worker worker, Cell targetCell) {
-        // Allows a second build on the same cell if it's not a dome yet
-        targetCell.getBlock().buildBlock();  // First build
-        if (!targetCell.getBlock().hasDome() && !hasBuiltOnce) {
-            targetCell.getBlock().buildBlock();  // Second build (only block, not dome)
+        if (canBuildOnCell(worker, targetCell)) {
+            targetCell.getBlock().buildBlock();
+            lastBuiltCell = targetCell;  // Remember last built cell
             hasBuiltOnce = true;
         }
-        hasBuiltOnce = false; // Reset for the next build turn
     }
 
     @Override
     public boolean checkWinCondition(Worker worker) {
         // Normal win condition
         return worker.getPosition().getBlock().getHeight() == MAX_HEIGHT;
+    }
+
+    @Override
+    public void resetAll() {
+        lastBuiltCell = null;
+        hasBuiltOnce = false;
     }
 }

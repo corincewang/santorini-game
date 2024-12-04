@@ -19,6 +19,7 @@ class App extends React.Component<Props, GameState> {
       action: 'place', 
       showWinner: false,
       godCards: {},
+      awaitingExtraBuild: false,
     };
   }
 
@@ -148,38 +149,82 @@ class App extends React.Component<Props, GameState> {
     }
   };
   
-
   buildBlock = async (x: number, y: number): Promise<void> => {
     try {
-      const response = await fetch(`/play?action=build&x=${x}&y=${y}`);
-      const json = await response.json();
-  
-      if (json.error) {
-        alert(json.error);
-      } else {
-        const updatedCells = json.gameState?.cells || [];
-        const currentPlayer = json.gameState?.currentPlayer || 'Player 1';
-        const nextAction = json.gameState?.action || 'chooseWorker'; 
-  
-        const mergedCells = this.state.cells.map((cell) => {
-          const updatedCell = updatedCells.find(
-            (updated) => updated.x === cell.x && updated.y === cell.y
-          );
-          return updatedCell || cell;
-        });
-  
-        this.setState({
-          cells: mergedCells,
-          currentPlayer: currentPlayer,
-          action: nextAction  
-        });
+        const response = await fetch(`/play?action=build&x=${x}&y=${y}`);
+        const json = await response.json();
 
+        if (json.error) {
+            alert(json.error);
+        } else {
+            const updatedCells = json.gameState?.cells || [];
+            const currentPlayer = json.gameState?.currentPlayer || 'Player 1';
+            const nextAction = json.gameState?.action || 'chooseWorker';
 
-      }
+            const mergedCells = this.state.cells.map((cell) => {
+                const updatedCell = updatedCells.find(
+                    (updated) => updated.x === cell.x && updated.y === cell.y
+                );
+                return updatedCell || cell;
+            });
+
+            // Check if an extra build is allowed
+            if (json.message?.includes("You may perform an extra build")) {
+                console.log("Extra build opportunity available");
+                this.setState({
+                    cells: mergedCells,
+                    currentPlayer: currentPlayer,
+                    action: 'extraBuild', // Set to a specific extra build state
+                    awaitingExtraBuild: true, // Flag for UI changes
+                });
+            } else {
+                console.log("Build complete and turn management updated");
+                this.setState({
+                    cells: mergedCells,
+                    currentPlayer: currentPlayer,
+                    action: nextAction,
+                    awaitingExtraBuild: false, // Ensure the flag is cleared
+                });
+            }
+        }
     } catch (error) {
-      console.error('Failed to build block:', error);
+        console.error("Failed to build block:", error);
     }
-  };
+};
+
+// Optional passExtraBuild function to handle skipping extra builds
+passExtraBuild = async (): Promise<void> => {
+    try {
+        const response = await fetch(`/play?action=pass`);
+        const json = await response.json();
+
+        if (json.error) {
+            alert(json.error);
+        } else {
+            const updatedCells = json.gameState?.cells || [];
+            const currentPlayer = json.gameState?.currentPlayer || 'Player 1';
+            const nextAction = json.gameState?.action || 'chooseWorker';
+
+            const mergedCells = this.state.cells.map((cell) => {
+                const updatedCell = updatedCells.find(
+                    (updated) => updated.x === cell.x && updated.y === cell.y
+                );
+                return updatedCell || cell;
+            });
+
+            console.log("Extra build skipped and turn switched");
+            this.setState({
+                cells: mergedCells,
+                currentPlayer: currentPlayer,
+                action: nextAction,
+                awaitingExtraBuild: false, // Clear the flag after pass
+            });
+        }
+    } catch (error) {
+        console.error("Failed to pass extra build:", error);
+    }
+};
+
 
   selectGodCard = async (player, godCard) => {
     try {
@@ -233,6 +278,7 @@ mnn
   };
 
 
+
   renderGodCardStatus = () => {
     const { godCards } = this.state;
     const players = ["Player1", "Player2"];
@@ -250,6 +296,21 @@ mnn
 };
 
 
+renderExtraBuildOptions = () => {
+  if (this.state.awaitingExtraBuild) {
+      return (
+          <div className="extra-build-options">
+              <button onClick={this.passExtraBuild}>Pass Extra Build</button>
+              <p>Select another cell to build.</p>
+          </div>
+      );
+  }
+  return null;
+};
+
+// Add this to your render metho
+
+
 
   handleCellClick = (cell: Cell) => {
     const { action, currentPlayer } = this.state;
@@ -261,6 +322,8 @@ mnn
     } else if (action === 'move' && cell.playable) {
       this.moveWorker(cell.x, cell.y);
     } else if (action === 'build' && cell.playable) {
+      this.buildBlock(cell.x, cell.y);
+    } else if (action === 'extraBuild' && cell.playable) {
       this.buildBlock(cell.x, cell.y);
     } else {
       console.log(`Action ${action} not permitted on cell (${cell.x}, ${cell.y}).`);
@@ -375,6 +438,7 @@ closeModal = () => {
                 </div>
             </div>
             {this.renderGodCardStatus()}  {/* Right-side God card status area */}
+            {this.renderExtraBuildOptions()}
         </div>
     );
 }

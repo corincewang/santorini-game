@@ -74,4 +74,8 @@ public class Minotaur implements GodCard {
     public boolean checkWinCondition(Worker worker) {
         return worker.getPosition().getBlock().getHeight() == MAX_HEIGHT;
     }
+
+    @Override
+    public void resetAll() {
+    }
 }

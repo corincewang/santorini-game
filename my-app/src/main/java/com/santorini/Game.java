@@ -72,6 +72,7 @@ public class Game {
     public void setAwaitingExtraBuild(boolean awaiting) {
         this.awaitingExtraBuild = awaiting;
     }
+    
 
     /**
      * Checks if the game has reached an end condition. Determines a winner if either 

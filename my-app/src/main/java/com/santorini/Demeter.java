@@ -6,13 +6,11 @@ public class Demeter implements GodCard {
 
     @Override
     public boolean canMoveToCell(Worker worker, Cell targetCell) {
-        // Demeter does not affect moving, so defer to default logic
         return !targetCell.isOccupied() && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
     @Override
     public boolean canBuildOnCell(Worker worker, Cell targetCell) {
-        // Can build if not the last built cell
         return !targetCell.equals(lastBuiltCell) && worker.getValidNeighbors().contains(targetCell) && !targetCell.getBlock().hasDome();
     }
 
@@ -25,11 +23,13 @@ public class Demeter implements GodCard {
     @Override
     public void applyMoveRule(Worker worker, Cell origin, Cell destination) {
        // Demeter does not affect moving, so no special rules
+        worker.setPosition(destination);
+        origin.setOccupiedWorker(null);
+        destination.setOccupiedWorker(worker);
     }
 
     @Override
     public void applyBuildRule(Worker worker, Cell targetCell) {
-
         if (canBuildOnCell(worker, targetCell)) {
             targetCell.getBlock().buildBlock();
             lastBuiltCell = targetCell;  // Remember last built cell
@@ -41,6 +41,10 @@ public class Demeter implements GodCard {
     public boolean checkWinCondition(Worker worker) {
         // Normal win condition
         return worker.getPosition().getBlock().getHeight() == MAX_HEIGHT;
+    }
+
+    public void resetAll() {
+        lastBuiltCell = null;
     }
 
 
