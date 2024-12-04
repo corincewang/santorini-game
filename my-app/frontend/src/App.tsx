@@ -25,18 +25,29 @@ class App extends React.Component<Props, GameState> {
 
   newGame = async () => {
     try {
-      const response = await fetch('/newgame');
-      const json = await response.json();
-      console.log('New Game Response:', json);
-      this.setState({
-        cells: json.gameState?.cells || [],
-        currentPlayer: json.gameState?.currentPlayer || 'Player 1',
-        winner: null,
-      });
+        const response = await fetch('/newgame');
+        const json = await response.json();
+
+        if (json.error) {
+            alert(json.error);
+        } else {
+            console.log('New Game Response:', json);
+
+            this.setState({
+                cells: json.gameState?.cells || [], // Update to the new game's initial board
+                currentPlayer: json.gameState?.currentPlayer || 'Player 1', // Reset current player
+                winner: null, // Clear winner
+                showWinner: false, // Hide winner display
+                action: 'place', // Set to worker placement phase
+                godCards: {}, // Clear god card selections
+                awaitingExtraBuild: false, // Reset extra build flag
+            });
+        }
     } catch (error) {
-      console.error('Failed to start a new game:', error);
+        console.error('Failed to start a new game:', error);
     }
-  };
+};
+
 
 
   placeWorker = async (x: number, y: number): Promise<void> => {
@@ -110,44 +121,47 @@ class App extends React.Component<Props, GameState> {
     }
   };
 
-  
   moveWorker = async (x: number, y: number): Promise<void> => {
     try {
-      const response = await fetch(`/play?action=move&x=${x}&y=${y}`);
-      const json = await response.json();
+        const response = await fetch(`/play?action=move&x=${x}&y=${y}`);
+        const json = await response.json();
 
-      console.log('Move Worker Response:', json);
-      // Handle game end state
-      if (json.gameState.endState) {
-        this.setState({
-            winner: json.winner,
-            showWinner: true,
-        });
-      }
-      if (json.error) {
-        alert(json.error);
-      } else {
-        const updatedCells = json.gameState?.cells || [];
-  
-        const mergedCells = this.state.cells.map((cell) => {
-          const updatedCell = updatedCells.find(
-            (updated) => updated.x === cell.x && updated.y === cell.y
-          );
-          return updatedCell || cell;
-        });
-  
-        this.setState({
-          cells: mergedCells,
-          currentPlayer: json.gameState?.currentPlayer || 'Player 1',
-          action: 'build'  
-        });
+        console.log('Move Worker Response:', json);
 
-       
-      }
+        if (json.error) {
+            alert(json.error);
+        } else {
+            const updatedCells = json.gameState?.cells || [];
+            const mergedCells = this.state.cells.map((cell) => {
+                const updatedCell = updatedCells.find(
+                    (updated) => updated.x === cell.x && updated.y === cell.y
+                );
+                return updatedCell || cell;
+            });
+
+            if (json.gameState?.endState) {
+                // Game ends immediately after a win condition
+                this.setState({
+                    cells: mergedCells,
+                    winner: json.gameState.winner, // Set the winner from the server response
+                    showWinner: true,
+                    action: '', // Clear action to stop further interactions
+                });
+                console.log("Game ends, winner is:", json.gameState.winner);
+            } else {
+                // Proceed to the build phase if no win
+                this.setState({
+                    cells: mergedCells,
+                    currentPlayer: json.gameState?.currentPlayer || 'Player 1',
+                    action: 'build', // Continue to the build phase
+                });
+            }
+        }
     } catch (error) {
-      console.error('Failed to move worker:', error);
+        console.error('Failed to move worker:', error);
     }
-  };
+};
+
   
   buildBlock = async (x: number, y: number): Promise<void> => {
     try {
@@ -311,25 +325,28 @@ renderExtraBuildOptions = () => {
 // Add this to your render metho
 
 
+handleCellClick = (cell: Cell) => {
+  const { action, currentPlayer, showWinner } = this.state;
 
-  handleCellClick = (cell: Cell) => {
-    const { action, currentPlayer } = this.state;
-  
-    if (action === 'chooseWorker' && cell.player === currentPlayer) {
+  if (showWinner) {
+      return;
+  }
+
+  if (action === 'chooseWorker' && cell.player === currentPlayer) {
       this.chooseWorker(cell.x, cell.y);
-    } else if (action === 'place' && !cell.worker) {
+  } else if (action === 'place' && !cell.worker) {
       this.placeWorker(cell.x, cell.y);
-    } else if (action === 'move' && cell.playable) {
+  } else if (action === 'move' && cell.playable) {
       this.moveWorker(cell.x, cell.y);
-    } else if (action === 'build' && cell.playable) {
+  } else if (action === 'build' && cell.playable) {
       this.buildBlock(cell.x, cell.y);
-    } else if (action === 'extraBuild' && cell.playable) {
+  } else if (action === 'extraBuild' && cell.playable) {
       this.buildBlock(cell.x, cell.y);
-    } else {
+  } else {
       console.log(`Action ${action} not permitted on cell (${cell.x}, ${cell.y}).`);
-    }
-  };
-  
+  }
+};
+
   createCell = (cell, index) => {
     let cellClass = 'board-cell';
     let content = ''; // Initialize content as empty
@@ -419,16 +436,36 @@ closeModal = () => {
   }
 
   render(): React.ReactNode {
-    const { cells, winner, showWinner, currentPlayer, godCards } = this.state;
+    const { cells, showWinner, winner, currentPlayer, godCards } = this.state;
+
+    if (showWinner) {
+        // Render only the winner modal and new game button after the game ends
+        return (
+            <div className="app-container" style={{ textAlign: 'center', marginTop: '50px' }}>
+                <h1>{currentPlayer} Wins!</h1>
+                <button
+                    style={{
+                        padding: '10px 20px',
+                        fontSize: '16px',
+                        borderRadius: '5px',
+                        border: '1px solid #ccc',
+                        cursor: 'pointer',
+                        backgroundColor: '#f9f9f9',
+                    }}
+                    onClick={this.newGame}
+                >
+                    Start New Game
+                </button>
+            </div>
+        );
+    }
+
+    // Normal rendering if the game is ongoing
     return (
-        <div className="app-container">  {/* Container using flex layout */}
-            <div>  {/* Main content area */}
+        <div className="app-container">
+            <div>
                 <h1>Santorini Game</h1>
-                {showWinner ? (
-                    <h2>{currentPlayer} Wins</h2>
-                ) : (
-                    <h2>Current Turn: {currentPlayer}</h2>
-                )}
+                <h2>Current Turn: {currentPlayer}</h2>
                 {!godCards[currentPlayer] && this.renderGodCardSelection()}
                 <div id="board">
                     {cells.map((cell, i) => this.createCell(cell, i))}
@@ -437,12 +474,11 @@ closeModal = () => {
                     <button onClick={this.newGame}>New Game</button>
                 </div>
             </div>
-            {this.renderGodCardStatus()}  {/* Right-side God card status area */}
+            {this.renderGodCardStatus()}
             {this.renderExtraBuildOptions()}
         </div>
     );
 }
-
 
 
   
