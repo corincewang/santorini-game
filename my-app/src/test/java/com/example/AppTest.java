@@ -105,38 +105,53 @@ public class AppTest extends TestCase {
         assertEquals(1, board.getCell(2, 1).getBlock().getHeight());
     }
     
-    public void testWinCondition() {
+    @Test
+    public void testWinConditionWithoutGodCards() {
+        // No god cards assigned
         player1.setGodCard(null);
         player2.setGodCard(null);
-        int x1 = 1, y1 = 2, x2 = 1, y2 = 3; 
-        player1.placeWorker(board.getCell(x1, y1), board.getCell(x2, y2), board);
-        Worker worker1 = player1.selectWorker(0);
-        Worker worker2 = player1.selectWorker(1);
-
-        System.out.println("round 1: " );
-        game.moveWorker(worker1, board.getCell(2, 1));
-        worker1.buildBlock(board.getCell(2, 2));
-        game.moveWorker(worker2, board.getCell(1, 2));
-        worker2.buildBlock(board.getCell(2, 3));
-
-        System.out.println("round 2: " );
-        game.moveWorker(worker1, board.getCell(2, 2));
-        worker1.buildBlock(board.getCell(2, 3));
-        game.moveWorker(worker2, board.getCell(2, 1));
-        worker2.buildBlock(board.getCell(3, 2));
-
-        System.out.println("round 3: " );
-        game.moveWorker(worker1, board.getCell(2, 3));
-        worker1.buildBlock(board.getCell(2, 2));
-        game.moveWorker(worker2, board.getCell(3, 2));
-        worker2.buildBlock(board.getCell(2, 2));
-
-        System.out.println("round 4: " );
-        game.moveWorker(worker1, board.getCell(2, 2));
-        
-
+    
+        // Place workers on the board
+        player1.placeWorker(board.getCell(1, 1), board.getCell(1, 2), board);
+        player2.placeWorker(board.getCell(4, 4), board.getCell(4, 3), board);
+    
+        Worker player1Worker = player1.selectWorker(0);
+        Worker player2Worker = player2.selectWorker(0);
+    
+        // Player1's turn: Move and build
+        game.moveWorker(player1Worker, board.getCell(2, 1));
+        player1Worker.buildBlock(board.getCell(2, 2));
+    
+        // Player2's turn: Move and build
+        game.moveWorker(player2Worker, board.getCell(3, 4));
+        player2Worker.buildBlock(board.getCell(3, 3));
+    
+        // Player1's turn: Move and build
+        game.moveWorker(player1Worker, board.getCell(2, 2));
+        player1Worker.buildBlock(board.getCell(2, 3));
+    
+        // Player2's turn: Move and build
+        game.moveWorker(player2Worker, board.getCell(3, 3));
+        player2Worker.buildBlock(board.getCell(2, 3));
+    
+        // Player1's turn: Prepare for the win
+        game.moveWorker(player1Worker, board.getCell(2, 3));
+        board.getCell(2, 2).getBlock().buildBlock(); // Level 2
+        board.getCell(2, 2).getBlock().buildBlock(); // Level 3
+    
+        // Player2's turn: Normal move and build
+        Worker player2Worker2 = player2.selectWorker(1);
+        game.moveWorker(player2Worker2, board.getCell(4, 3));
+        player2Worker2.buildBlock(board.getCell(4, 2));
+    
+        // Player1's turn: Move to level 3 and win
+        game.moveWorker(player1Worker, board.getCell(2, 2));
+    
+        // Check win condition
         assertTrue(player1.checkWinStatus());
+        assertEquals(player1, game.getWinner());
     }
+    
 
 
     @Test
