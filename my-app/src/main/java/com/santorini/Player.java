@@ -36,12 +36,12 @@ public class Player {
      * @param board the game board
      */
     public void placeWorker(Cell cell1, Cell cell2, Board board) {
-        if (cell1 != null) {
+        if (cell1 != null && !cell1.isOccupied()) {
             this.workers[0] = new Worker(cell1, board, this);
             cell1.setOccupiedWorker(this.workers[0]); 
         }
     
-        if (cell2 != null) {
+        if (cell2 != null && !cell2.isOccupied()) {
             this.workers[1] = new Worker(cell2, board, this);
             cell2.setOccupiedWorker(this.workers[1]); 
         }

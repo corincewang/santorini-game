@@ -73,8 +73,6 @@ public class Worker {
      * @return a list of valid neighboring cells for movement
      */
     public List<Cell> getValidNeighbors(){
-        // System.out.print("worker");
-        // System.out.print(board == null);
         List<Cell> validNeighbors = new ArrayList<>();
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {

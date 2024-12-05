@@ -165,7 +165,7 @@ public class App extends NanoHTTPD {
         Player currentPlayer = this.game.getTurn();
         int placedWorkers = playerWorkerCount.getOrDefault(currentPlayer, 0);
     
-        if (placedWorkers < 2) {
+        if (placedWorkers < 2 && this.game.getBoard().getCell(x, y).getOccupiedWorker() == null) {
             this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
             placedWorkers++;
             playerWorkerCount.put(currentPlayer, placedWorkers);
