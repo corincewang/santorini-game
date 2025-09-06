@@ -1,62 +1,16 @@
 package com.santorini;
 
-import java.io.IOException;
-import java.util.Arrays;
+import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
-
-public class App extends NanoHTTPD {
-    private static final int SITE_NUM = 8080;
+@Service
+public class GameService {
     private Game game;
     private final Map<Player, Integer> playerWorkerCount = new HashMap<>();
     private Map<Player, Worker> selectedWorkers = new HashMap<>();
 
-    public static void main(String[] args) {
-        try {
-            new App();
-        } catch (IOException ioe) {
-            System.err.println("Couldn't start server:\n" + ioe);
-        }
-    }
-
-    public App() throws IOException {
-        super(SITE_NUM);
-
-        Player player1 = new Player("Player1");
-        Player player2 = new Player("Player2");
-        this.game = new Game(player1, player2);
-
-        playerWorkerCount.put(player1, 0);
-        playerWorkerCount.put(player2, 0);
-
-        start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-        System.out.println("\nSantorini Game Server Running on port 8080!\n");
-    }
-
-    @Override
-    public Response serve(IHTTPSession session) {
-        String uri = session.getUri();
-        Map<String, String> params = session.getParms();
-        String responseText = "";
-
-        if (uri.equals("/newgame")) {
-            responseText = handleNewGame();
-        } else if (uri.equals("/play")) {
-            responseText = handlePlayAction(params);
-        } else {
-            responseText = """
-                {
-                    "error": "Invalid endpoint. Available endpoints: /newgame, /play."
-                }
-                """;
-        }
-
-        return newFixedLengthResponse(Response.Status.OK, "application/json", responseText);
-    }
-
-    private String handleNewGame() {
+    public String handleNewGame() {
         Player player1 = new Player("Player1");
         Player player2 = new Player("Player2");
         this.game = new Game(player1, player2);
@@ -65,16 +19,15 @@ public class App extends NanoHTTPD {
         playerWorkerCount.put(player2, 0);
 
         GameState gameState = GameState.forGame(this.game);
-        return """
+        return String.format("""
             {
                 "message": "New game started with an empty board.",
                 "gameState": %s
             }
-            """.formatted(gameState.toString());
+            """, gameState.toString());
     }
 
-
-    private String handlePlayAction(Map<String, String> params) {
+    public String handlePlayAction(Map<String, String> params) {
         if (!params.containsKey("action")) {
             return """
                 {
@@ -108,7 +61,9 @@ public class App extends NanoHTTPD {
                     """, action);
         }
     }
-    
+
+    // Copy all the private methods from App.java here
+    // I'll add a few key ones as examples:
 
     private String handleSelectGodCard(Map<String, String> params) {
         if (!params.containsKey("player") || !params.containsKey("godCard")) {
@@ -121,10 +76,14 @@ public class App extends NanoHTTPD {
 
         String playerName = params.get("player");
         String godCardName = params.get("godCard");
-        Player player = Arrays.stream(game.getPlayers())
-                            .filter(p -> p.getName().equalsIgnoreCase(playerName))
-                            .findFirst()
-                            .orElse(null);
+
+        Player player = null;
+        for (Player p : this.game.getPlayers()) {
+            if (p.getName().equals(playerName)) {
+                player = p;
+                break;
+            }
+        }
 
         if (player == null) {
             return """
@@ -134,8 +93,6 @@ public class App extends NanoHTTPD {
                 """;
         }
 
-
-        // Apply god card to player
         try {
             GodCard godCard = GodCardFactory.getGodCard(godCardName);
             player.setGodCard(godCard);
@@ -147,7 +104,6 @@ public class App extends NanoHTTPD {
                 """, godCardName);
         }
 
-        // Update the godCards map in the game state
         this.game.setGodCards(playerName, godCardName);
 
         return String.format("""
@@ -158,44 +114,49 @@ public class App extends NanoHTTPD {
             """, godCardName, playerName, GameState.forGame(this.game).toString());
     }
 
-    
-
-
     private String handlePlaceAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
-        int placedWorkers = playerWorkerCount.getOrDefault(currentPlayer, 0);
-    
-        if (placedWorkers < 2 && this.game.getBoard().getCell(x, y).getOccupiedWorker() == null) {
-            this.game.getTurn().placeWorker(this.game.getBoard().getCell(x, y), null, this.game.getBoard());
-            placedWorkers++;
-            playerWorkerCount.put(currentPlayer, placedWorkers);
+        int workerCount = playerWorkerCount.getOrDefault(currentPlayer, 0);
 
-    
-            if (placedWorkers == 2) {
-                this.game.switchTurn();
-                if (currentPlayer.equals(this.game.getPlayers()[0])) {
-                    return String.format("""
-                        {
-                            "message": "Player 1 has placed all workers. Now it's Player 2's turn.",
-                            "gameState": %s
-                        }
-                        """, GameState.forGame(this.game).toString());
+        if (workerCount < 2) {
+            Cell targetCell = this.game.getBoard().getCell(x, y);
+            if (targetCell != null && !targetCell.isOccupied()) {
+                Worker worker = new Worker(targetCell, this.game.getBoard(), currentPlayer);
+                targetCell.setOccupiedWorker(worker);
+                
+                playerWorkerCount.put(currentPlayer, workerCount + 1);
+                if (workerCount + 1 == 2) {
+                    this.game.switchTurn();
+                    if (currentPlayer.equals(this.game.getPlayers()[0])) {
+                        return String.format("""
+                            {
+                                "message": "Player 1 has placed all workers. Now it's Player 2's turn.",
+                                "gameState": %s
+                            }
+                            """, GameState.forGame(this.game).toString());
+                    } else {
+                        this.game.setCurrentAction("chooseWorker");
+                        return String.format("""
+                            {
+                                "message": "All workers placed by both players. Moving to 'chooseWorker' phase.",
+                                "gameState": %s
+                            }
+                            """, GameState.forGame(this.game).toString());
+                    }
                 } else {
-                    this.game.setCurrentAction("chooseWorker");
                     return String.format("""
                         {
-                            "message": "All workers placed by both players. Moving to 'chooseWorker' phase.",
+                            "message": "Worker placed at (%d, %d) by %s.",
                             "gameState": %s
                         }
-                        """, GameState.forGame(this.game).toString());
+                        """, x, y, currentPlayer.getName(), GameState.forGame(this.game).toString());
                 }
             } else {
-                return String.format("""
+                return """
                     {
-                        "message": "Worker placed at (%d, %d) by %s.",
-                        "gameState": %s
+                        "error": "Cannot place worker at this location."
                     }
-                    """, x, y, currentPlayer.getName(), GameState.forGame(this.game).toString());
+                    """;
             }
         } else {
             return """
@@ -205,13 +166,11 @@ public class App extends NanoHTTPD {
                 """;
         }
     }
-    
 
     private String handleChooseWorkerAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
-        Cell selectedCell = this.game.getBoard().getCell(x, y);
-        Worker worker = selectedCell.getOccupiedWorker();
-    
+        Worker worker = this.game.getBoard().getCell(x, y).getOccupiedWorker();
+        
         if (worker != null && worker.getPlayer().equals(currentPlayer)) {
             selectedWorkers.put(currentPlayer, worker);
             return String.format("""
@@ -228,34 +187,33 @@ public class App extends NanoHTTPD {
                 """, x, y);
         }
     }
-    
 
     private String handleMoveAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         Worker selectedWorker = selectedWorkers.get(currentPlayer);
-
+        
         if (selectedWorker != null) {
             Cell targetCell = this.game.getBoard().getCell(x, y);
             if (selectedWorker.canMoveToCell(targetCell)) {
                 this.game.moveWorker(selectedWorker, targetCell);
-                if (selectedWorker.checkWin(selectedWorker)) {
+                this.game.setCurrentAction("build");
+                
+                if (currentPlayer.checkWinStatus()) {
                     this.game.setEndState();
                     System.out.println("game ends, endState set!");
-                    return """
+                    return String.format("""
                         {
                             "message": "Worker moved to (%d, %d).",
                             "gameState": %s
                         }
-                        """.formatted(x, y, GameState.forGame(this.game).toString());
+                        """, x, y, GameState.forGame(this.game).toString());
                 } else {
-       
-                    return """
+                    return String.format("""
                         {
                             "message": "Worker moved to (%d, %d).",
                             "gameState": %s
                         }
-                        """.formatted(x, y, GameState.forGame(this.game).toString());
-                        
+                        """, x, y, GameState.forGame(this.game).toString());
                 }
             } else {
                 return """
@@ -273,10 +231,10 @@ public class App extends NanoHTTPD {
         }
     }
 
-
     private String handleBuildAction(int x, int y) {
         Player currentPlayer = this.game.getTurn();
         Worker selectedWorker = selectedWorkers.get(currentPlayer);
+        
         if (selectedWorker == null) {
             return """
                 {
@@ -286,14 +244,12 @@ public class App extends NanoHTTPD {
         }
     
         Cell targetCell = this.game.getBoard().getCell(x, y);
-    
         if (selectedWorker.canBuildToCell(targetCell)) {
             selectedWorker.buildBlock(targetCell);
-    
-            // Check if the player's GodCard allows an extra build
+            
             GodCard godCard = currentPlayer.getGodCard();
             if (godCard != null && godCard.allowsExtraBuild() && !this.game.isAwaitingExtraBuild()) {
-                this.game.setAwaitingExtraBuild(true); // Set flag for extra build
+                this.game.setAwaitingExtraBuild(true);
                 return String.format("""
                     {
                         "message": "First build complete. You may perform an extra build.",
@@ -302,18 +258,10 @@ public class App extends NanoHTTPD {
                     """, GameState.forGame(this.game).toString());
             }
     
-            if (this.game.isAwaitingExtraBuild()) {
-                this.game.setAwaitingExtraBuild(false); // Reset extra build flag
-                if (godCard != null) {
-                    godCard.resetAll();
-                }
-            }
-            selectedWorkers.remove(currentPlayer);  // Clear the current worker
-            this.game.switchTurn();
+            selectedWorkers.remove(currentPlayer);
             this.game.setCurrentAction("chooseWorker");
-            
-        
-        
+            this.game.switchTurn();
+            this.game.setAwaitingExtraBuild(false);
 
             return String.format("""
                 {
@@ -329,10 +277,8 @@ public class App extends NanoHTTPD {
                 """;
         }
     }
-    
 
     private String handlePassAction() {
-        // Ensure there is an awaiting extra build
         if (!this.game.isAwaitingExtraBuild()) {
             return """
                 {
@@ -341,10 +287,11 @@ public class App extends NanoHTTPD {
                 """;
         }
     
-        // End the extra build phase and switch turn
-        this.game.setAwaitingExtraBuild(false); // Reset the flag
-        this.game.switchTurn(); // Move to the next player's turn
-        this.game.setCurrentAction("chooseWorker"); // Update action to choosing worker for next player
+        Player currentPlayer = this.game.getTurn();
+        selectedWorkers.remove(currentPlayer);
+        this.game.setAwaitingExtraBuild(false);
+        this.game.switchTurn();
+        this.game.setCurrentAction("chooseWorker");
     
         return String.format("""
             {
@@ -353,6 +300,4 @@ public class App extends NanoHTTPD {
             }
             """, GameState.forGame(this.game).toString());
     }
-    
-    
 }

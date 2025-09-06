@@ -25,7 +25,7 @@ class App extends React.Component<Props, GameState> {
 
   newGame = async () => {
     try {
-        const response = await fetch('/newgame');
+        const response = await fetch('/api/newgame');
         const json = await response.json();
 
         if (json.error) {
@@ -52,7 +52,7 @@ class App extends React.Component<Props, GameState> {
 
   placeWorker = async (x: number, y: number): Promise<void> => {
     try {
-        const response = await fetch(`/play?action=place&x=${x}&y=${y}`);
+        const response = await fetch(`/api/play?action=place&x=${x}&y=${y}`);
         const json = await response.json();
 
         if (json.error) {
@@ -112,7 +112,7 @@ class App extends React.Component<Props, GameState> {
 
   chooseWorker = async (x, y) => {
     try {
-      const response = await fetch(`/play?action=chooseWorker&x=${x}&y=${y}`);
+      const response = await fetch(`/api/play?action=chooseWorker&x=${x}&y=${y}`);
       const json = await response.json();
       this.setState({ ...json, action: 'move' }); 
       this.disableGodCardSelection(json.gameState.currentPlayer);
@@ -123,7 +123,7 @@ class App extends React.Component<Props, GameState> {
 
   moveWorker = async (x: number, y: number): Promise<void> => {
     try {
-        const response = await fetch(`/play?action=move&x=${x}&y=${y}`);
+        const response = await fetch(`/api/play?action=move&x=${x}&y=${y}`);
         const json = await response.json();
 
         console.log('Move Worker Response:', json);
@@ -165,7 +165,7 @@ class App extends React.Component<Props, GameState> {
   
   buildBlock = async (x: number, y: number): Promise<void> => {
     try {
-        const response = await fetch(`/play?action=build&x=${x}&y=${y}`);
+        const response = await fetch(`/api/play?action=build&x=${x}&y=${y}`);
         const json = await response.json();
 
         if (json.error) {
@@ -207,7 +207,7 @@ class App extends React.Component<Props, GameState> {
 // Optional passExtraBuild function to handle skipping extra builds
 passExtraBuild = async (): Promise<void> => {
     try {
-        const response = await fetch(`/play?action=pass`);
+        const response = await fetch(`/api/play?action=pass`);
         const json = await response.json();
 
         if (json.error) {
@@ -242,7 +242,7 @@ passExtraBuild = async (): Promise<void> => {
     try {
         console.log(`Attempting to select God Card: ${godCard} for Player: ${player}`);
         
-        const response = await fetch(`/play?action=selectGodCard&player=${player}&godCard=${godCard}`, {
+        const response = await fetch(`/api/play?action=selectGodCard&player=${player}&godCard=${godCard}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
